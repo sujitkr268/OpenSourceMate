@@ -1,3 +1,9 @@
+export interface SkillShare {
+  name: string;
+  repository_count: number;
+  percentage: number;
+}
+
 export interface ExportPayload {
   username: string;
   name?: string | null;
@@ -6,17 +12,74 @@ export interface ExportPayload {
   repositoriesCount?: number;
   followers?: number;
   following?: number;
-  skills: Array<{ name: string; repository_count: number; percentage: number }>;
+  skills: SkillShare[];
   totalRepositoriesAnalyzed?: number;
   exportedAt?: string;
 }
 
+export type ExportFormat = "json" | "csv" | "markdown";
+
+/**
+ * Escapes a string value according to RFC 4180 CSV standards.
+ * Wraps values containing commas, double quotes, or newlines in double quotes,
+ * and escapes embedded double quotes by doubling them ("").
+ */
+export function escapeCsvField(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  const str = String(value);
+  if (/[",\n\r]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+/**
+ * Generates an RFC 4180-compliant CSV report containing profile summary metrics
+ * and a breakdown of identified developer skills.
+ */
+export function generateCsvReport(data: ExportPayload): string {
+  const exportDate = data.exportedAt || new Date().toISOString().split("T")[0];
+  const lines: string[] = [];
+
+  // Metadata / Summary Section
+  lines.push("Section,Field,Value");
+  lines.push(`Profile,Username,${escapeCsvField(data.username)}`);
+  lines.push(`Profile,Name,${escapeCsvField(data.name || "")}`);
+  lines.push(`Profile,Bio,${escapeCsvField(data.bio || "")}`);
+  lines.push(`Profile,Profile URL,${escapeCsvField(data.profileUrl || `https://github.com/${data.username}`)}`);
+  lines.push(`Profile,Analysis Date,${escapeCsvField(exportDate)}`);
+  lines.push(`Activity,Public Repositories,${data.repositoriesCount ?? 0}`);
+  lines.push(`Activity,Followers,${data.followers ?? 0}`);
+  lines.push(`Activity,Following,${data.following ?? 0}`);
+  lines.push(`Activity,Repositories Analyzed,${data.totalRepositoriesAnalyzed ?? 0}`);
+  lines.push("");
+
+  // Skills Breakdown Table
+  lines.push("Skill,Repository Count,Percentage");
+  if (data.skills && data.skills.length > 0) {
+    for (const skill of data.skills) {
+      lines.push(
+        `${escapeCsvField(skill.name)},${skill.repository_count},${skill.percentage}%`
+      );
+    }
+  } else {
+    lines.push("No technical skills detected,0,0%");
+  }
+
+  return lines.join("\r\n");
+}
+
+/**
+ * Generates a formatted Markdown report of the developer analysis.
+ */
 export function generateMarkdownReport(data: ExportPayload): string {
   const exportDate = data.exportedAt || new Date().toISOString().split("T")[0];
   const nameDisplay = data.name ? `${data.name} (@${data.username})` : `@${data.username}`;
 
   const skillsTable =
-    data.skills.length > 0
+    data.skills && data.skills.length > 0
       ? data.skills
           .map(
             (s) =>
@@ -46,6 +109,9 @@ ${skillsTable}
 `;
 }
 
+/**
+ * Generates an indented JSON representation of the complete profile and skills analysis.
+ */
 export function generateJsonReport(data: ExportPayload): string {
   return JSON.stringify(
     {
@@ -59,6 +125,60 @@ export function generateJsonReport(data: ExportPayload): string {
   );
 }
 
+/**
+ * Returns a standardized export filename based on the GitHub username and format.
+ */
+export function getExportFilename(username: string, format: ExportFormat): string {
+  const sanitized = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "") || "profile";
+  const dateStr = new Date().toISOString().split("T")[0];
+  switch (format) {
+    case "json":
+      return `opensourcemate-${sanitized}-${dateStr}.json`;
+    case "csv":
+      return `opensourcemate-${sanitized}-${dateStr}.csv`;
+    case "markdown":
+      return `opensourcemate-${sanitized}-${dateStr}.md`;
+  }
+}
+
+/**
+ * Returns the MIME type corresponding to the chosen export format.
+ */
+export function getExportMimeType(format: ExportFormat): string {
+  switch (format) {
+    case "json":
+      return "application/json;charset=utf-8";
+    case "csv":
+      return "text/csv;charset=utf-8";
+    case "markdown":
+      return "text/markdown;charset=utf-8";
+  }
+}
+
+/**
+ * Initiates a browser download of the analysis in the specified format.
+ */
+export function exportAnalysisData(data: ExportPayload, format: ExportFormat): void {
+  let content = "";
+  switch (format) {
+    case "json":
+      content = generateJsonReport(data);
+      break;
+    case "csv":
+      content = generateCsvReport(data);
+      break;
+    case "markdown":
+      content = generateMarkdownReport(data);
+      break;
+  }
+  const filename = getExportFilename(data.username, format);
+  const mimeType = getExportMimeType(format);
+  downloadFile(content, filename, mimeType);
+}
+
+/**
+ * Triggers a native browser file download using an object URL.
+ */
 export function downloadFile(
   content: string,
   filename: string,

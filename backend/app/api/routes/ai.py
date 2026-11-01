@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 from app.ai.ai_service import analyze_issue
-
+from app.schemas.serializers import IssueAnalysisRequestSerializer
 
 router = APIRouter(
     prefix="/api/ai",
@@ -10,14 +9,9 @@ router = APIRouter(
 )
 
 
-class IssueAnalysisRequest(BaseModel):
-    issue: dict
-    user_skills: list[str]
-
-
-@router.post("/analyze-issue")
+@router.post("/analyze-issue", summary="AI-powered issue suitability analysis")
 async def analyze_github_issue(
-    request: IssueAnalysisRequest,
+    request: IssueAnalysisRequestSerializer,
 ):
     try:
         analysis = await analyze_issue(

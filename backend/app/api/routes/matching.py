@@ -9,6 +9,7 @@ from app.services.issue_service import search_github_issues
 from app.services.embedding_service import similarities
 from app.services.matching_service import build_idf, calculate_issue_score
 from app.ai.ai_service import generate_issue_match_explanation
+from app.utils.validation import validate_github_username
 
 
 router = APIRouter(
@@ -22,7 +23,8 @@ async def get_matched_issues(
     username: str,
     exclude_stale: bool = Query(default=False),
 ):
-    repositories = await get_user_repositories(username)
+    validated_username = validate_github_username(username)
+    repositories = await get_user_repositories(validated_username)
 
     if repositories is None:
         raise HTTPException(
@@ -52,7 +54,7 @@ async def get_matched_issues(
 
     if not user_skills:
         return {
-            "username": username,
+            "username": validated_username,
             "skills": [],
             "recommendations": [],
         }
@@ -141,7 +143,7 @@ async def get_matched_issues(
         issue["why_it_matches"] = explanation_data["explanation"]
 
     return {
-        "username": username,
+        "username": validated_username,
         "skills": user_skills,
         "recommendations": top_recommendations,
     }

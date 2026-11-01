@@ -244,6 +244,61 @@ pytest --cov=app
 
 ---
 
+## 📡 API Endpoints & Error Handling
+
+All backend responses are serialized with Pydantic serializers, and error responses conform to a unified error shape.
+
+### Health Check
+
+```http
+GET /api/health/
+GET /api/health
+```
+
+Returns the service health status and version.
+
+**Response (`200 OK`):**
+
+```json
+{
+  "status": "healthy",
+  "service": "OpenSourceMate API",
+  "version": "0.1.0"
+}
+```
+
+```http
+GET /api/health/diagnostics
+```
+
+Returns detailed diagnostic metrics including GitHub API connectivity and cache performance.
+
+### Unified Error Format
+
+All error responses across all API endpoints return a standardized JSON structure with machine-readable error codes and human-readable messages:
+
+```json
+{
+  "error": {
+    "code": "INVALID_USERNAME",
+    "message": "Invalid GitHub username '-octocat'. GitHub usernames must be 1-39 characters, contain only alphanumeric characters or single hyphens, and cannot start or end with a hyphen.",
+    "details": {
+      "username": "-octocat"
+    }
+  },
+  "detail": "Invalid GitHub username '-octocat'. GitHub usernames must be 1-39 characters, contain only alphanumeric characters or single hyphens, and cannot start or end with a hyphen."
+}
+```
+
+Common error codes:
+* `INVALID_USERNAME` (HTTP 400): Username violates GitHub format constraints.
+* `NOT_FOUND` (HTTP 404): Requested GitHub user or resource not found.
+* `VALIDATION_ERROR` (HTTP 422): Request parameters or body payload failed schema validation.
+* `RATE_LIMIT_EXCEEDED` (HTTP 429): Upstream GitHub rate limit reached; includes `reset_at` timestamp.
+* `INTERNAL_SERVER_ERROR` (HTTP 500): Unhandled exception during processing.
+
+---
+
 ## 🔐 Environment Variables
 
 OpenSourceMate uses environment variables to configure the Next.js frontend and FastAPI backend.

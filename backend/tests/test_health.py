@@ -123,3 +123,18 @@ def test_cache_stats():
     cache.set("b", 2, ttl=60)
     assert cache.stats()["active_entries"] == 2
     assert cache.stats()["total_keys"] == 2
+
+
+def test_health_endpoint_trailing_slash():
+    async def make_request():
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="https://test") as client:
+            return await client.get("/api/health/")
+
+    response = asyncio.run(make_request())
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "healthy",
+        "service": "OpenSourceMate API",
+        "version": "0.1.0",
+    }

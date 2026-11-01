@@ -44,6 +44,16 @@ class Settings(BaseSettings):
     # How long (in seconds) GitHub responses are cached in memory. 0 to disable.
     github_cache_ttl: int = 300
 
+    # GitHub repository pagination configuration (Issue #129)
+    # Maximum number of repository pages to fetch per user analysis.
+    github_max_repo_pages: int = 3
+
+    # Items per page requested from GitHub API (maximum allowed by GitHub is 100).
+    github_repos_per_page: int = 100
+
+    # Sensible upper bound on the total number of repositories analyzed per profile.
+    github_max_repos_cap: int = 300
+
     # -------------------------------------------------------------------------
     # AI Analysis Configuration
     # -------------------------------------------------------------------------

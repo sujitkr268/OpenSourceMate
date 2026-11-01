@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
+from app.schemas.serializers import IssueSearchResponseSerializer
 from app.services.github_service import GitHubRateLimitError
 from app.services.issue_service import search_github_issues
-
 
 router = APIRouter(
     prefix="/api/issues",
@@ -10,7 +10,11 @@ router = APIRouter(
 )
 
 
-@router.get("/search")
+@router.get(
+    "/search",
+    response_model=IssueSearchResponseSerializer,
+    summary="Search good first issues on GitHub",
+)
 async def search_issues(
     language: str | None = Query(default=None),
     label: str | None = Query(default=None),
