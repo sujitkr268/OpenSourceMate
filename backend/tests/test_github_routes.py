@@ -15,6 +15,12 @@ USER = {
     "followers": 10,
     "following": 2,
     "html_url": "https://github.com/octocat",
+    "location": "San Francisco, CA",
+    "company": "@github",
+    "blog": "https://github.blog",
+    "twitter_username": "github",
+    "created_at": "2011-01-25T18:44:36Z",
+    "public_gists": 8,
 }
 
 
@@ -59,7 +65,69 @@ def test_get_user_valid():
         "followers": 10,
         "following": 2,
         "profile_url": "https://github.com/octocat",
+        "location": "San Francisco, CA",
+        "company": "@github",
+        "blog": "https://github.blog",
+        "twitter_username": "github",
+        "created_at": "2011-01-25T18:44:36Z",
+        "public_gists": 8,
     }
+
+
+def test_get_user_sparse_profile():
+    sparse_user = {
+        "login": "minimalist",
+        "name": None,
+        "bio": None,
+        "avatar_url": "https://example.com/min.png",
+        "public_repos": 0,
+        "followers": 0,
+        "following": 0,
+        "html_url": "https://github.com/minimalist",
+        "location": None,
+        "company": None,
+        "blog": None,
+        "twitter_username": None,
+        "created_at": "2022-01-01T00:00:00Z",
+        "public_gists": 0,
+    }
+    with patch_user(sparse_user):
+        response = client.get("/api/github/users/minimalist")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["username"] == "minimalist"
+    assert data["name"] is None
+    assert data["bio"] is None
+    assert data["location"] is None
+    assert data["company"] is None
+    assert data["blog"] is None
+    assert data["twitter_username"] is None
+    assert data["created_at"] == "2022-01-01T00:00:00Z"
+    assert data["public_gists"] == 0
+
+
+def test_get_user_missing_optional_keys():
+    bare_user = {
+        "login": "barebones",
+        "avatar_url": "https://example.com/b.png",
+        "public_repos": 1,
+        "followers": 0,
+        "following": 0,
+        "html_url": "https://github.com/barebones",
+    }
+    with patch_user(bare_user):
+        response = client.get("/api/github/users/barebones")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["username"] == "barebones"
+    assert data["name"] is None
+    assert data["bio"] is None
+    assert data["location"] is None
+    assert data["company"] is None
+    assert data["blog"] is None
+    assert data["twitter_username"] is None
+    assert data["created_at"] is None
+    assert data["public_gists"] == 0
 
 
 def test_get_user_not_found():
@@ -103,14 +171,16 @@ def test_skills_valid():
     assert response.status_code == 200
     assert body["username"] == "octocat"
     assert body["total_repositories_analyzed"] == 3
-    # type and weight are additive fields; the original three keys are unchanged.
-    assert body["skills"][0] == {
-        "name": "Python",
-        "repository_count": 2,
-        "percentage": 66.67,
-        "type": "language",
-        "weight": 1.0,
-    }
+    # type, weight, and proficiency indicators are additive fields; the original keys are unchanged.
+    skill_0 = body["skills"][0]
+    assert skill_0["name"] == "Python"
+    assert skill_0["repository_count"] == 2
+    assert skill_0["percentage"] == 66.67
+    assert skill_0["type"] == "language"
+    assert skill_0["weight"] == 1.0
+    assert skill_0["proficiency"] in ("Learning", "Comfortable", "Strong")
+    assert isinstance(skill_0["proficiency_score"], float)
+    assert "Estimated as" in skill_0["proficiency_reason"]
 
 
 def test_skills_zero_repos():

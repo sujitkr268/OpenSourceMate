@@ -1,13 +1,29 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import ExportMenu from "../components/ExportMenu";
 import GitHubLink from "../components/GitHubLink";
+import ProfileCard from "../components/ProfileCard";
 import RecentSearches from "../components/RecentSearches";
 import SkillChart from "../components/SkillChart";
-import { validateGitHubUsername, resolveAnalyzerErrorMessage } from "../utils/validation";
+import SkillProficiencyBadge from "../components/SkillProficiencyBadge";
 import {
-  downloadFile,
-  generateJsonReport,
-  generateMarkdownReport,
+  type GitHubUserProfile as Profile,
+  type SkillItem as Skill,
+  type UserSkillsResponse as SkillsData,
+  type IssueRecommendation as Recommendation,
+} from "../types/api";
+import {
+  fetchUserProfile,
+  fetchUserSkills,
+  fetchMatchedIssues as apiFetchMatchedIssues,
+  createSearchSignal,
+  cancelPendingSearch,
+  isAbortError,
+  ApiClientError,
+} from "../utils/apiClient";
+import {
+  exportAnalysisData,
+  type ExportFormat,
   type ExportPayload,
 } from "../utils/exportAnalysis";
 import {
@@ -16,50 +32,12 @@ import {
   removeRecentSearch,
   clearRecentSearches,
 } from "../utils/recentSearches";
-
-type Profile = {
-  username: string;
-  name: string | null;
-  bio: string | null;
-  avatar_url: string;
-  public_repositories: number;
-  followers: number;
-  following: number;
-  profile_url: string;
-};
-
-type Skill = {
-  name: string;
-  repository_count: number;
-  percentage: number;
-};
-
-type Recommendation = {
-  id: number;
-  title: string;
-  repository: string;
-  url: string;
-  state: string;
-  labels: string[];
-  comments: number;
-  created_at: string;
-  updated_at: string;
-  language?: string;
-  match_score?: number;
-  score?: number;
-  match_reasons?: string[];
-  reasons?: string[];
-  explanation?: string;
-  is_ai_generated?: boolean;
-};
-
-type SkillsData = {
-  skills: Skill[];
-  total_repositories_analyzed: number;
-};
+import {
+  validateGitHubUsername,
+  resolveAnalyzerErrorMessage,
+} from "../utils/validation";
 
 export default function Home() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
@@ -135,30 +113,28 @@ export default function Home() {
     setRecentSearches([]);
   };
 
-  const fetchMatchedIssues = async (targetUsername: string) => {
+  useEffect(() => {
+    return () => {
+      cancelPendingSearch();
+    };
+  }, []);
+
+  const fetchMatchedIssues = async (targetUsername: string, signal?: AbortSignal) => {
     setLoadingMatching(true);
     setMatchingError("");
 
     try {
-      const matchResponse = await fetch(
-        `${API_URL}/api/matching/users/${encodeURIComponent(targetUsername)}/issues`
-      );
-
-      if (!matchResponse.ok) {
-        setMatchingError("Unable to load recommended issues right now.");
-        return;
-      }
-
-      const matchData = await matchResponse.json();
+      const matchData = await apiFetchMatchedIssues(targetUsername, { signal });
       setRecommendations(matchData.recommendations || []);
-    } catch {
+    } catch (err: unknown) {
+      if (isAbortError(err)) return;
       setMatchingError("Unable to load recommended issues. Please try again later.");
     } finally {
       setLoadingMatching(false);
     }
   };
 
-  const handleExport = (format: "markdown" | "json") => {
+  const handleExport = (format: ExportFormat) => {
     if (!profile) return;
 
     const payload: ExportPayload = {
@@ -174,21 +150,7 @@ export default function Home() {
       exportedAt: new Date().toISOString().split("T")[0],
     };
 
-    if (format === "markdown") {
-      const content = generateMarkdownReport(payload);
-      downloadFile(
-        content,
-        `opensourcemate-${profile.username}-analysis.md`,
-        "text/markdown;charset=utf-8"
-      );
-    } else {
-      const content = generateJsonReport(payload);
-      downloadFile(
-        content,
-        `opensourcemate-${profile.username}-analysis.json`,
-        "application/json;charset=utf-8"
-      );
-    }
+    exportAnalysisData(payload, format);
   };
 
   // Dynamic language options extracted from recommendations
@@ -211,10 +173,14 @@ export default function Home() {
       }
 
       if (labelFilter === "good-first-issue") {
-        const hasGFI = rec.labels?.some((l) => l.toLowerCase().includes("good first issue"));
+        const hasGFI = rec.labels?.some((l) =>
+          l.toLowerCase().includes("good first issue")
+        );
         if (!hasGFI) return false;
       } else if (labelFilter === "help-wanted") {
-        const hasHW = rec.labels?.some((l) => l.toLowerCase().includes("help wanted"));
+        const hasHW = rec.labels?.some((l) =>
+          l.toLowerCase().includes("help wanted")
+        );
         if (!hasHW) return false;
       }
 
@@ -232,7 +198,13 @@ export default function Home() {
 
       return true;
     });
-  }, [recommendations, languageFilter, labelFilter, minScoreFilter, searchQuery]);
+  }, [
+    recommendations,
+    languageFilter,
+    labelFilter,
+    minScoreFilter,
+    searchQuery,
+  ]);
 
   const hasActiveFilters =
     languageFilter !== "all" ||
@@ -273,70 +245,11 @@ export default function Home() {
       setRecommendations([]);
     }
 
+    const searchSignal = createSearchSignal();
+
     try {
-      if (!API_URL) {
-        throw new Error("The analyzer is not configured right now. Please try again later.");
-      }
-
-      const profileResponse = await fetch(
-        `${API_URL}/api/github/users/${encodeURIComponent(cleanUsername)}`
-      );
-
-      if (profileResponse.status === 404) {
-        setError(resolveAnalyzerErrorMessage(404, { username: cleanUsername }));
-        return;
-      }
-
-      if (profileResponse.status === 429) {
-        let resetAt: string | undefined;
-        try {
-          const data = await profileResponse.json();
-          if (data.reset_at) resetAt = data.reset_at;
-        } catch {
-          // ignore
-        }
-        throw new Error(resolveAnalyzerErrorMessage(429, { resetAt }));
-      }
-
-      if (profileResponse.status === 502 || profileResponse.status === 503) {
-        throw new Error(resolveAnalyzerErrorMessage(profileResponse.status));
-      }
-
-      if (!profileResponse.ok) {
-        throw new Error(resolveAnalyzerErrorMessage(profileResponse.status));
-      }
-
-      const profileData: Profile = await profileResponse.json();
-
-      const skillsResponse = await fetch(
-        `${API_URL}/api/github/users/${encodeURIComponent(cleanUsername)}/skills`
-      );
-
-      if (skillsResponse.status === 404) {
-        setError(resolveAnalyzerErrorMessage(404, { username: cleanUsername }));
-        return;
-      }
-
-      if (skillsResponse.status === 429) {
-        let resetAt: string | undefined;
-        try {
-          const data = await skillsResponse.json();
-          if (data.reset_at) resetAt = data.reset_at;
-        } catch {
-          // ignore
-        }
-        throw new Error(resolveAnalyzerErrorMessage(429, { resetAt }));
-      }
-
-      if (skillsResponse.status === 502 || skillsResponse.status === 503) {
-        throw new Error(resolveAnalyzerErrorMessage(skillsResponse.status));
-      }
-
-      if (!skillsResponse.ok) {
-        throw new Error(resolveAnalyzerErrorMessage(skillsResponse.status));
-      }
-
-      const skillsData: SkillsData = await skillsResponse.json();
+      const profileData = await fetchUserProfile(cleanUsername, { signal: searchSignal });
+      const skillsData = await fetchUserSkills(cleanUsername, { signal: searchSignal });
 
       setProfile(profileData);
       setSkills(skillsData);
@@ -345,9 +258,30 @@ export default function Home() {
       const updatedSearches = saveRecentSearch(cleanUsername);
       setRecentSearches(updatedSearches);
 
-      fetchMatchedIssues(cleanUsername);
-    } catch (err) {
+      fetchMatchedIssues(cleanUsername, searchSignal);
+    } catch (err: unknown) {
+      if (isAbortError(err)) {
+        return; // Prior in-flight search was aborted by a new search
+      }
       setCanRetry(true);
+      if (err instanceof ApiClientError) {
+        if (err.status === 404) {
+          setError(resolveAnalyzerErrorMessage(404, { username: cleanUsername }));
+          return;
+        }
+        if (err.status === 429) {
+          setError(resolveAnalyzerErrorMessage(429, { resetAt: err.resetAt }));
+          return;
+        }
+        if (err.status === 502 || err.status === 503 || err.status === 504) {
+          setError(resolveAnalyzerErrorMessage(err.status));
+          return;
+        }
+        if (err.code === "NETWORK_ERROR" || err.status === 0) {
+          setError(resolveAnalyzerErrorMessage(new TypeError(err.message)));
+          return;
+        }
+      }
       setError(resolveAnalyzerErrorMessage(err));
     } finally {
       setLoading(false);
@@ -363,7 +297,9 @@ export default function Home() {
 
       <div
         className={`min-h-screen transition-colors duration-300 ${
-          theme === "dark" ? "bg-[#05070d] text-white" : "bg-gray-50 text-gray-900"
+          theme === "dark"
+            ? "bg-[#05070d] text-white"
+            : "bg-gray-50 text-gray-900"
         }`}
       >
         {/* Background decorative gradient */}
@@ -376,7 +312,9 @@ export default function Home() {
         <header
           role="banner"
           className={`sticky top-0 z-40 border-b backdrop-blur-xl transition-colors duration-300 ${
-            theme === "dark" ? "border-white/5 bg-[#05070d]/80" : "border-gray-200 bg-white/90"
+            theme === "dark"
+              ? "border-white/5 bg-[#05070d]/80"
+              : "border-gray-200 bg-white/90"
           }`}
         >
           <nav
@@ -391,7 +329,9 @@ export default function Home() {
                 ✦
               </div>
 
-              <span className="text-lg font-semibold tracking-tight">OpenSourceMate</span>
+              <span className="text-lg font-semibold tracking-tight">
+                OpenSourceMate
+              </span>
             </div>
 
             {/* Desktop Navigation */}
@@ -418,7 +358,9 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+                onClick={() =>
+                  setTheme((current) => (current === "dark" ? "light" : "dark"))
+                }
                 aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
                 aria-pressed={theme === "light"}
                 className={`rounded-xl border px-3.5 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 ${
@@ -435,7 +377,9 @@ export default function Home() {
             <div className="flex items-center gap-2 md:hidden">
               <button
                 type="button"
-                onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+                onClick={() =>
+                  setTheme((current) => (current === "dark" ? "light" : "dark"))
+                }
                 aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
                 className="rounded-xl border border-white/10 bg-white/5 p-2 text-sm"
               >
@@ -459,7 +403,11 @@ export default function Home() {
                     stroke="currentColor"
                     aria-hidden="true"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 ) : (
                   <svg
@@ -481,6 +429,7 @@ export default function Home() {
             </div>
           </nav>
 
+          {/* Mobile dropdown menu */}
           {mobileMenuOpen && (
             <div
               id="mobile-navigation"
@@ -560,8 +509,9 @@ export default function Home() {
                   theme === "dark" ? "text-gray-300" : "text-gray-700"
                 }`}
               >
-                OpenSourceMate analyzes your GitHub profile and technical experience to help you
-                discover meaningful open-source contribution opportunities.
+                OpenSourceMate analyzes your GitHub profile and technical
+                experience to help you discover meaningful open-source
+                contribution opportunities.
               </p>
             </div>
           </section>
@@ -641,9 +591,16 @@ export default function Home() {
                   </button>
                 </div>
 
+                <RecentSearches
+                  searches={recentSearches}
+                  onSelect={handleSelectRecent}
+                  onRemove={handleRemoveRecent}
+                  onClear={handleClearRecent}
+                  theme={theme}
+                />
+
                 <span id="username-hint" className="sr-only">
-                  Provide a public GitHub username to analyze technical skills and receive matched
-                  issues.
+                  Provide a public GitHub username to analyze technical skills and receive matched issues.
                 </span>
               </div>
 
@@ -676,14 +633,6 @@ export default function Home() {
               >
                 No GitHub login required • Public profile data only
               </p>
-
-              <RecentSearches
-                searches={recentSearches}
-                onSelect={handleSelectRecent}
-                onRemove={handleRemoveRecent}
-                onClear={handleClearRecent}
-                theme={theme}
-              />
             </div>
           </section>
 
@@ -731,82 +680,17 @@ export default function Home() {
                   </div>
 
                   {profile && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleExport("markdown")}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 ${
-                          theme === "dark"
-                            ? "border-white/10 bg-white/5 text-gray-200 hover:bg-white/10"
-                            : "border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
-                        }`}
-                        title="Export summary as Markdown (.md)"
-                      >
-                        <span>↓</span> Export Markdown
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleExport("json")}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 ${
-                          theme === "dark"
-                            ? "border-white/10 bg-white/5 text-gray-200 hover:bg-white/10"
-                            : "border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
-                        }`}
-                        title="Export raw data as JSON (.json)"
-                      >
-                        <span>↓</span> Export JSON
-                      </button>
-                    </div>
+                    <ExportMenu onExport={handleExport} />
                   )}
                 </div>
 
-                {/* Profile Card */}
+                {/* Profile card */}
                 {profile && (
-                  <div
-                    className={`mt-6 rounded-3xl border p-5 sm:p-8 ${
-                      theme === "dark"
-                        ? "border-white/10 bg-white/[0.035]"
-                        : "border-gray-200 bg-white shadow-sm"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={profile.avatar_url}
-                          alt={`${profile.name || profile.username}'s avatar`}
-                          className="h-16 w-16 rounded-full border border-white/10 object-cover"
-                        />
-                        <div>
-                          <h3 className="text-xl font-bold">{profile.name || profile.username}</h3>
-                          <p className="text-sm text-purple-400">@{profile.username}</p>
-                          {profile.bio && (
-                            <p
-                              className={`mt-1 text-sm ${
-                                theme === "dark" ? "text-gray-300" : "text-gray-600"
-                              }`}
-                            >
-                              {profile.bio}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex gap-4">
-                        <div className="text-center">
-                          <p className="text-xs text-gray-400">Repositories</p>
-                          <p className="text-lg font-semibold">{profile.public_repositories}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xs text-gray-400">Followers</p>
-                          <p className="text-lg font-semibold">{profile.followers}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xs text-gray-400">Following</p>
-                          <p className="text-lg font-semibold">{profile.following}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ProfileCard
+                    profile={profile}
+                    onExport={(format) => handleExport(format)}
+                    className="mb-8"
+                  />
                 )}
 
                 {/* Skills Section */}
@@ -824,7 +708,9 @@ export default function Home() {
                           TECHNICAL PROFILE
                         </p>
 
-                        <h3 className="mt-2 text-2xl font-bold">Your technical skills</h3>
+                        <h3 className="mt-2 text-2xl font-bold">
+                          Your technical skills
+                        </h3>
 
                         <p
                           className={`mt-2 text-sm ${
@@ -850,9 +736,13 @@ export default function Home() {
                           theme === "dark" ? "border-white/10" : "border-gray-300"
                         }`}
                       >
-                        <p className={theme === "dark" ? "text-gray-300" : "text-gray-600"}>
-                          No public repositories with a language were found for this profile, so
-                          there are no skills to show yet.
+                        <p
+                          className={
+                            theme === "dark" ? "text-gray-300" : "text-gray-600"
+                          }
+                        >
+                          No public repositories with a language were found for this
+                          profile, so there are no skills to show yet.
                         </p>
                       </div>
                     ) : (
@@ -866,7 +756,11 @@ export default function Home() {
 
                         <div className="mt-8 grid gap-4 sm:grid-cols-2 sm:gap-5">
                           {skills.skills.map((skill) => (
-                            <SkillCard key={skill.name} skill={skill} theme={theme} />
+                            <SkillCard
+                              key={skill.name}
+                              skill={skill}
+                              theme={theme}
+                            />
                           ))}
                         </div>
                       </>
@@ -898,44 +792,196 @@ export default function Home() {
                           theme === "dark" ? "text-gray-300" : "text-gray-600"
                         }`}
                       >
-                        Opportunities matching your skills and experience, ranked by compatibility
-                        score.
+                        Opportunities matching your skills and experience, ranked by compatibility score.
                       </p>
                     </div>
 
                     {recommendations.length > 0 && (
                       <div
-                        className={`text-xs ${
+                        className={`text-xs sm:text-sm ${
                           theme === "dark" ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        {recommendations.length} {recommendations.length === 1 ? "issue" : "issues"}{" "}
-                        recommended
+                        Showing {filteredRecommendations.length} of {recommendations.length} issues
                       </div>
                     )}
                   </div>
 
-                  {/* Loading State */}
-                  {loadingMatching && (
+                  {/* Filter Toolbar (Issue #47) */}
+                  {recommendations.length > 0 && (
                     <div
-                      className={`mt-8 rounded-2xl border border-dashed p-10 text-center ${
-                        theme === "dark" ? "border-white/10" : "border-gray-300"
+                      className={`mt-6 rounded-2xl border p-4 ${
+                        theme === "dark"
+                          ? "border-white/5 bg-black/20"
+                          : "border-gray-200 bg-gray-50/50"
                       }`}
-                      aria-live="polite"
                     >
-                      <div
-                        className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-purple-400 border-t-transparent"
-                        aria-hidden="true"
-                      />
-                      <p
-                        className={`text-sm ${
-                          theme === "dark" ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        Searching GitHub for issues matching your skills...
-                      </p>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        {/* Search input filter */}
+                        <div>
+                          <label
+                            htmlFor="issue-search-filter"
+                            className="block text-xs font-semibold text-gray-400"
+                          >
+                            Search issues
+                          </label>
+                          <input
+                            id="issue-search-filter"
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Filter by title or repo..."
+                            className={`mt-1.5 w-full rounded-xl border px-3 py-2 text-xs outline-none transition ${
+                              theme === "dark"
+                                ? "border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-purple-400"
+                                : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-purple-600"
+                            }`}
+                          />
+                        </div>
+
+                        {/* Language filter dropdown */}
+                        <div>
+                          <label
+                            htmlFor="issue-lang-filter"
+                            className="block text-xs font-semibold text-gray-400"
+                          >
+                            Language
+                          </label>
+                          <select
+                            id="issue-lang-filter"
+                            value={languageFilter}
+                            onChange={(e) => setLanguageFilter(e.target.value)}
+                            className={`mt-1.5 w-full rounded-xl border px-3 py-2 text-xs outline-none transition ${
+                              theme === "dark"
+                                ? "border-white/10 bg-[#0c101d] text-white focus:border-purple-400"
+                                : "border-gray-300 bg-white text-gray-900 focus:border-purple-600"
+                            }`}
+                          >
+                            <option value="all">All Languages</option>
+                            {availableLanguages.map((lang) => (
+                              <option key={lang} value={lang}>
+                                {lang}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Label type filter dropdown */}
+                        <div>
+                          <label
+                            htmlFor="issue-label-filter"
+                            className="block text-xs font-semibold text-gray-400"
+                          >
+                            Label Type
+                          </label>
+                          <select
+                            id="issue-label-filter"
+                            value={labelFilter}
+                            onChange={(e) => setLabelFilter(e.target.value)}
+                            className={`mt-1.5 w-full rounded-xl border px-3 py-2 text-xs outline-none transition ${
+                              theme === "dark"
+                                ? "border-white/10 bg-[#0c101d] text-white focus:border-purple-400"
+                                : "border-gray-300 bg-white text-gray-900 focus:border-purple-600"
+                            }`}
+                          >
+                            <option value="all">All Labels</option>
+                            <option value="good-first-issue">Good First Issue</option>
+                            <option value="help-wanted">Help Wanted</option>
+                          </select>
+                        </div>
+
+                        {/* Minimum match score selector */}
+                        <div>
+                          <label
+                            htmlFor="issue-score-filter"
+                            className="block text-xs font-semibold text-gray-400"
+                          >
+                            Min Match: {minScoreFilter}%
+                          </label>
+                          <input
+                            id="issue-score-filter"
+                            type="range"
+                            min="0"
+                            max="90"
+                            step="10"
+                            value={minScoreFilter}
+                            onChange={(e) => setMinScoreFilter(Number(e.target.value))}
+                            className="mt-2.5 w-full accent-purple-500 cursor-pointer"
+                          />
+                        </div>
+                      </div>
+
+                      {hasActiveFilters && (
+                        <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3 text-xs">
+                          <span className="text-gray-400">
+                            Active filters applied
+                          </span>
+                          <button
+                            type="button"
+                            onClick={resetFilters}
+                            className="text-purple-400 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 rounded"
+                          >
+                            Reset filters
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
+
+                  {/* Loading State */}
+                  {loadingMatching && (
+                    <div className="mt-6 space-y-4">
+                      {[0, 1].map((i) => (
+                        <div
+                          key={i}
+                          className="rounded-2xl border border-white/5 bg-black/20 p-5"
+                        >
+                          <div className="flex items-center justify-between">
+                            <Bar className="h-4 w-40" />
+                            <Bar className="h-6 w-14" />
+                          </div>
+                          <Bar className="mt-3 h-5 w-3/4" />
+                          <div className="mt-4 flex gap-2">
+                            <Bar className="h-6 w-16" />
+                            <Bar className="h-6 w-20" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Filter Empty State (Issue #47) */}
+                  {!loadingMatching &&
+                    recommendations.length > 0 &&
+                    filteredRecommendations.length === 0 && (
+                      <div
+                        className={`mt-8 rounded-2xl border border-dashed p-8 text-center ${
+                          theme === "dark" ? "border-white/10" : "border-gray-300"
+                        }`}
+                      >
+                        <p
+                          className={`text-sm font-medium ${
+                            theme === "dark" ? "text-gray-300" : "text-gray-700"
+                          }`}
+                        >
+                          No issues match the selected filter criteria.
+                        </p>
+                        <p
+                          className={`mt-1 text-xs ${
+                            theme === "dark" ? "text-gray-500" : "text-gray-400"
+                          }`}
+                        >
+                          Try resetting filters to view all recommended contribution opportunities.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={resetFilters}
+                          className="mt-4 inline-flex items-center rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-purple-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+                        >
+                          Clear Filters
+                        </button>
+                      </div>
+                    )}
 
                   {/* Error State */}
                   {!loadingMatching && matchingError && (
@@ -954,16 +1000,20 @@ export default function Home() {
                         theme === "dark" ? "border-white/10" : "border-gray-300"
                       }`}
                     >
-                      <p className={theme === "dark" ? "text-gray-300" : "text-gray-600"}>
+                      <p
+                        className={
+                          theme === "dark" ? "text-gray-300" : "text-gray-600"
+                        }
+                      >
                         No matching open issues found for the detected skills at this time.
                       </p>
                     </div>
                   )}
 
                   {/* Issue list */}
-                  {!loadingMatching && recommendations.length > 0 && (
+                  {!loadingMatching && filteredRecommendations.length > 0 && (
                     <div className="mt-6 space-y-4">
-                      {recommendations.map((issue) => (
+                      {filteredRecommendations.map((issue) => (
                         <IssueCard key={issue.id} issue={issue} theme={theme} />
                       ))}
                     </div>
@@ -1001,8 +1051,8 @@ export default function Home() {
                     theme === "dark" ? "text-gray-300" : "text-gray-600"
                   }`}
                 >
-                  A simple workflow designed to remove the guesswork from getting started with open
-                  source.
+                  A simple workflow designed to remove the guesswork from
+                  getting started with open source.
                 </p>
               </div>
 
@@ -1059,14 +1109,16 @@ export default function Home() {
                   theme === "dark" ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                Stop scrolling through thousands of issues. Start contributing to projects where
-                your skills can make an impact.
+                Stop scrolling through thousands of issues.
+                Start contributing to projects where your skills can make an impact.
               </p>
 
               <button
                 type="button"
                 onClick={() => {
-                  document.getElementById("analyzer")?.scrollIntoView({ behavior: "smooth" });
+                  document
+                    .getElementById("analyzer")
+                    ?.scrollIntoView({ behavior: "smooth" });
                   document.getElementById("github-username-input")?.focus();
                 }}
                 className="mt-8 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-black transition hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2"
@@ -1091,7 +1143,9 @@ export default function Home() {
           >
             <p>© {new Date().getFullYear()} OpenSourceMate</p>
             <p>Built for the open-source community.</p>
-            <GitHubLink className="transition hover:text-purple-400">View Repository ↗</GitHubLink>
+            <GitHubLink className="transition hover:text-purple-400">
+              View Repository ↗
+            </GitHubLink>
           </div>
         </footer>
       </div>
@@ -1103,53 +1157,50 @@ export default function Home() {
 /* Reusable Components                */
 /* ---------------------------------- */
 
-function StatCard({
-  value,
-  label,
+function SkillCard({
+  skill,
   theme,
 }: {
-  value: number;
-  label: string;
-  theme: "dark" | "light";
+  skill: Skill;
+  theme?: "dark" | "light";
 }) {
   return (
     <div
       className={`rounded-2xl border p-4 sm:p-5 ${
-        theme === "dark" ? "border-white/5 bg-black/30" : "border-gray-200 bg-gray-50"
-      }`}
-    >
-      <p className="text-2xl font-bold tracking-tight">{value.toLocaleString()}</p>
-
-      <p
-        className={`mt-1 text-xs uppercase tracking-wider ${
-          theme === "dark" ? "text-gray-400" : "text-gray-600"
-        }`}
-      >
-        {label}
-      </p>
-    </div>
-  );
-}
-
-function SkillCard({ skill, theme }: { skill: Skill; theme: "dark" | "light" }) {
-  return (
-    <div
-      className={`rounded-2xl border p-4 sm:p-5 ${
-        theme === "dark" ? "border-white/5 bg-black/30" : "border-gray-200 bg-gray-50"
+        theme === "dark"
+          ? "border-white/5 bg-black/20"
+          : "border-gray-200 bg-gray-50"
       }`}
     >
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="font-semibold">{skill.name}</h4>
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="font-semibold">{skill.name}</h4>
+            <SkillProficiencyBadge
+              level={skill.proficiency}
+              score={skill.proficiency_score}
+              reason={skill.proficiency_reason}
+              repositoryCount={skill.repository_count}
+              percentage={skill.percentage}
+              theme={theme}
+            />
+          </div>
 
-          <p className={`mt-1 text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
-            {skill.repository_count} {skill.repository_count === 1 ? "repository" : "repositories"}
+          <p
+            className={`mt-1 text-xs ${
+              theme === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            {skill.repository_count}{" "}
+            {skill.repository_count === 1 ? "repository" : "repositories"}
           </p>
         </div>
 
         <span
-          className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${
-            theme === "dark" ? "bg-white/10 text-gray-200" : "bg-purple-100 text-purple-800"
+          className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
+            theme === "dark"
+              ? "bg-white/5 text-gray-300"
+              : "bg-gray-200 text-gray-800"
           }`}
         >
           {skill.percentage}%
@@ -1158,16 +1209,11 @@ function SkillCard({ skill, theme }: { skill: Skill; theme: "dark" | "light" }) 
 
       <div
         className={`mt-4 h-1.5 overflow-hidden rounded-full ${
-          theme === "dark" ? "bg-white/10" : "bg-gray-200"
+          theme === "dark" ? "bg-white/5" : "bg-gray-200"
         }`}
-        role="progressbar"
-        aria-valuenow={skill.percentage}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`${skill.name} proficiency: ${skill.percentage}%`}
       >
         <div
-          className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-700"
+          className="h-full rounded-full bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-700"
           style={{ width: `${skill.percentage}%` }}
         />
       </div>
@@ -1175,109 +1221,140 @@ function SkillCard({ skill, theme }: { skill: Skill; theme: "dark" | "light" }) 
   );
 }
 
-function IssueCard({ issue, theme }: { issue: Recommendation; theme: "dark" | "light" }) {
-  const score = issue.match_score ?? issue.score ?? 0;
+function IssueCard({
+  issue,
+  theme,
+}: {
+  issue: Recommendation;
+  theme?: "dark" | "light";
+}) {
+  const isGoodFirst = issue.labels?.some((l) =>
+    l.toLowerCase().includes("good first")
+  );
+  const isHelpWanted = issue.labels?.some((l) =>
+    l.toLowerCase().includes("help wanted")
+  );
+
+  const score = Math.round(issue.match_score ?? issue.score ?? 0);
   const reasons = issue.match_reasons ?? issue.reasons ?? [];
 
-  const getScoreBadgeStyle = (s: number) => {
-    if (s >= 70) return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
-    if (s >= 40) return "border-purple-500/30 bg-purple-500/10 text-purple-300";
-    return "border-blue-500/30 bg-blue-500/10 text-blue-300";
+  const getScoreBadgeStyle = (val: number) => {
+    if (val >= 80)
+      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
+    if (val >= 60) return "border-blue-500/30 bg-blue-500/10 text-blue-400";
+    return "border-purple-500/30 bg-purple-500/10 text-purple-400";
   };
-
-  const formattedDate = issue.updated_at
-    ? new Date(issue.updated_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
 
   return (
     <article
-      aria-label={`Issue: ${issue.title}`}
-      className={`rounded-2xl border p-4 transition sm:p-6 ${
+      aria-label={`${issue.title} in ${issue.repository}`}
+      className={`rounded-2xl border p-5 transition hover:border-purple-500/30 ${
         theme === "dark"
-          ? "border-white/10 bg-black/20 hover:border-white/20"
-          : "border-gray-200 bg-gray-50/50 hover:border-gray-300"
+          ? "border-white/10 bg-white/[0.02]"
+          : "border-gray-200 bg-white shadow-sm"
       }`}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-mono font-medium text-purple-400 break-all">
+            <span
+              className={`font-semibold ${
+                theme === "dark" ? "text-purple-400" : "text-purple-600"
+              }`}
+            >
               {issue.repository}
             </span>
+
             {issue.language && (
-              <span
-                className={`rounded-md border px-2 py-0.5 text-xs ${
-                  theme === "dark"
-                    ? "border-white/10 bg-white/5 text-gray-200"
-                    : "border-gray-200 bg-white text-gray-800"
-                }`}
-              >
-                {issue.language}
-              </span>
+              <>
+                <span className="text-gray-500" aria-hidden="true">•</span>
+                <span
+                  className={
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }
+                >
+                  {issue.language}
+                </span>
+              </>
             )}
-            {formattedDate && (
-              <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
-                Updated {formattedDate}
-              </span>
+
+            {issue.comments > 0 && (
+              <>
+                <span className="text-gray-500" aria-hidden="true">•</span>
+                <span
+                  className={
+                    theme === "dark" ? "text-gray-400" : "text-gray-600"
+                  }
+                >
+                  {issue.comments} comments
+                </span>
+              </>
             )}
-            <span className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
-              💬 {issue.comments} comments
-            </span>
           </div>
 
-          <h4 className="mt-2 text-base font-semibold leading-snug break-words sm:text-lg">
+          <h4 className="mt-2 text-base font-semibold leading-snug">
             <a
               href={issue.url}
               target="_blank"
               rel="noopener noreferrer"
               className="transition hover:text-purple-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded"
             >
-              {issue.title} ↗
+              {issue.title}
             </a>
           </h4>
 
           {issue.labels && issue.labels.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Issue labels">
-              {issue.labels.slice(0, 6).map((label, idx) => {
-                const isGoodFirst = label.toLowerCase().includes("good first issue");
-                const isHelpWanted = label.toLowerCase().includes("help wanted");
-                return (
-                  <span
-                    key={idx}
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                      isGoodFirst
-                        ? "border border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                        : isHelpWanted
-                          ? "border border-amber-400/30 bg-amber-400/10 text-amber-300"
-                          : theme === "dark"
-                            ? "border border-white/10 bg-white/5 text-gray-300"
-                            : "border border-gray-300 bg-white text-gray-700"
-                    }`}
-                  >
-                    {label}
-                  </span>
-                );
-              })}
+              {issue.labels.slice(0, 5).map((label, idx) => (
+                <span
+                  key={idx}
+                  className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${
+                    isGoodFirst && label.toLowerCase().includes("good first")
+                      ? "border border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                      : isHelpWanted && label.toLowerCase().includes("help wanted")
+                      ? "border border-amber-400/30 bg-amber-400/10 text-amber-300"
+                      : theme === "dark"
+                      ? "border border-white/10 bg-white/5 text-gray-300"
+                      : "border border-gray-300 bg-white text-gray-700"
+                  }`}
+                >
+                  {label}
+                </span>
+              ))}
             </div>
           )}
 
+          {/* AI-Generated Explanation */}
           {issue.explanation && (
-            <div className="mt-3.5 rounded-xl border border-purple-500/20 bg-purple-500/5 p-3.5 text-xs">
-              <div className="flex items-center gap-1.5 font-semibold text-purple-300">
-                <span>
-                  {issue.is_ai_generated ? "✦ AI Match Grounding" : "🎯 Why this issue matches you"}
-                </span>
+            <div
+              className={`mt-4 rounded-xl border p-3.5 text-xs ${
+                theme === "dark"
+                  ? "border-purple-500/20 bg-purple-500/5 text-gray-200"
+                  : "border-purple-200 bg-purple-50 text-gray-800"
+              }`}
+            >
+              <div className="flex items-center gap-1.5 font-semibold text-purple-400">
+                <span aria-hidden="true">✦</span>
+                <span>Why this is recommended for you</span>
                 {issue.is_ai_generated && (
-                  <span className="rounded-full border border-purple-400/30 bg-purple-400/10 px-2 py-0.5 text-[10px] font-medium text-purple-200">
-                    AI Guided
+                  <span
+                    className={`ml-1.5 rounded-full px-1.5 py-0.2 text-[9px] uppercase tracking-wider font-bold ${
+                      theme === "dark"
+                        ? "bg-purple-400/20 text-purple-300"
+                        : "bg-purple-200 text-purple-800"
+                    }`}
+                  >
+                    AI MATCH
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-gray-300 leading-relaxed">{issue.explanation}</p>
+              <p
+                className={`mt-1 leading-relaxed ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                {issue.explanation}
+              </p>
             </div>
           )}
 
@@ -1293,9 +1370,7 @@ function IssueCard({ issue, theme }: { issue: Recommendation; theme: "dark" | "l
               <ul className="mt-1.5 space-y-1">
                 {reasons.map((reason, i) => (
                   <li key={i} className="flex items-center gap-1.5">
-                    <span className="text-purple-400" aria-hidden="true">
-                      ✓
-                    </span>
+                    <span className="text-purple-400" aria-hidden="true">✓</span>
                     <span>{reason}</span>
                   </li>
                 ))}
@@ -1311,7 +1386,9 @@ function IssueCard({ issue, theme }: { issue: Recommendation; theme: "dark" | "l
             )}`}
           >
             <span className="text-sm font-bold sm:text-base">{score}%</span>
-            <span className="block text-[10px] uppercase tracking-wider text-gray-400">Match</span>
+            <span className="block text-[10px] uppercase tracking-wider text-gray-400">
+              Match
+            </span>
           </div>
 
           <a
@@ -1370,7 +1447,9 @@ function StepCard({
       <h3 className="mt-7 text-lg font-semibold">{title}</h3>
 
       <p
-        className={`mt-3 text-sm leading-6 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}
+        className={`mt-3 text-sm leading-6 ${
+          theme === "dark" ? "text-gray-300" : "text-gray-600"
+        }`}
       >
         {description}
       </p>

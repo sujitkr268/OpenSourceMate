@@ -9,6 +9,7 @@ from app.services.github_service import (
 from app.services.issue_service import search_github_issues
 from app.services.matching_service import build_idf, calculate_issue_score
 from app.services.skill_service import analyze_skills
+from app.utils.validation import validate_github_username
 
 router = APIRouter(
     prefix="/api/matching",
@@ -21,7 +22,8 @@ async def get_matched_issues(
     username: str,
     exclude_stale: bool = Query(default=False),
 ):
-    repositories = await get_user_repositories(username)
+    validated_username = validate_github_username(username)
+    repositories = await get_user_repositories(validated_username)
 
     if repositories is None:
         raise HTTPException(
@@ -48,7 +50,7 @@ async def get_matched_issues(
 
     if not user_skills:
         return {
-            "username": username,
+            "username": validated_username,
             "skills": [],
             "recommendations": [],
         }
@@ -138,7 +140,7 @@ async def get_matched_issues(
         issue["why_it_matches"] = explanation_data["explanation"]
 
     return {
-        "username": username,
+        "username": validated_username,
         "skills": user_skills,
         "recommendations": top_recommendations,
     }

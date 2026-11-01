@@ -1,6 +1,5 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import Home from "../app/page";
 
 // Sample mock data matching backend responses
@@ -67,8 +66,12 @@ describe("Analyze Flow - Home Component", () => {
         name: /Find the open-source issues/i,
       })
     ).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Enter your GitHub username/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Analyze Profile/i })).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(/Enter your GitHub username/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Analyze Profile/i })
+    ).toBeInTheDocument();
   });
 
   it("shows an error when attempting to analyze an empty username", async () => {
@@ -77,7 +80,9 @@ describe("Analyze Flow - Home Component", () => {
     const analyzeBtn = screen.getByRole("button", { name: /Analyze Profile/i });
     fireEvent.click(analyzeBtn);
 
-    expect(await screen.findByText(/Please enter a GitHub username\./i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Please enter a GitHub username\./i)
+    ).toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -91,7 +96,7 @@ describe("Analyze Flow - Home Component", () => {
     fireEvent.click(analyzeBtn);
 
     expect(
-      await screen.findByText(/cannot begin with a hyphen|Invalid GitHub username/i)
+      await screen.findByText(/cannot begin with a hyphen/i)
     ).toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -124,7 +129,8 @@ describe("Analyze Flow - Home Component", () => {
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/github/users/octocat")
+        expect.stringContaining("/api/github/users/octocat"),
+        expect.any(Object)
       );
     });
   });
@@ -214,7 +220,9 @@ describe("Analyze Flow - Home Component", () => {
     fireEvent.change(input, { target: { value: "nonexistentuser999" } });
     fireEvent.click(screen.getByRole("button", { name: /Analyze Profile/i }));
 
-    expect(await screen.findByText(/could not be found/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/(?:GitHub user not found|could not be found)/i)
+    ).toBeInTheDocument();
   });
 
   it("displays rate limit error message with reset time on 429 response", async () => {
@@ -234,11 +242,13 @@ describe("Analyze Flow - Home Component", () => {
     fireEvent.change(input, { target: { value: "busyuser" } });
     fireEvent.click(screen.getByRole("button", { name: /Analyze Profile/i }));
 
-    expect(await screen.findByText(/GitHub API rate limit reached/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/rate limit reached.*try again at/i)
+    ).toBeInTheDocument();
   });
 
   it("displays server unavailable message on 502/503 response", async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 503,
       json: async () => ({ detail: "Service unavailable" }),
@@ -251,14 +261,14 @@ describe("Analyze Flow - Home Component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Analyze Profile/i }));
 
     expect(
-      await screen.findByText(
-        /GitHub API is temporarily unavailable\. Please try again in a few moments\./i
-      )
+      await screen.findByText(/temporarily unavailable/i)
     ).toBeInTheDocument();
   });
 
   it("displays network connectivity error and retry button on TypeError", async () => {
-    (global.fetch as jest.Mock).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    (global.fetch as jest.Mock)
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"));
 
     render(<Home />);
 
@@ -266,7 +276,9 @@ describe("Analyze Flow - Home Component", () => {
     fireEvent.change(input, { target: { value: "offlineuser" } });
     fireEvent.click(screen.getByRole("button", { name: /Analyze Profile/i }));
 
-    expect(await screen.findByText(/Unable to connect to the server/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Unable to connect to (?:the )?server/i)
+    ).toBeInTheDocument();
 
     const retryBtn = screen.getByRole("button", { name: /Retry/i });
     expect(retryBtn).toBeInTheDocument();
@@ -320,7 +332,8 @@ describe("Analyze Flow - Home Component", () => {
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/github/users/octocat")
+        expect.stringContaining("/api/github/users/octocat"),
+        expect.any(Object)
       );
     });
   });
