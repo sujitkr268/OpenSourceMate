@@ -129,11 +129,17 @@ class RepositoryItemSerializer(BaseModel):
 
 
 class RepositoryListSerializer(BaseModel):
-    """List of repositories for a user."""
+    """List of repositories for a user with pagination metadata."""
 
     username: str = Field(..., description="Target GitHub username")
     repository_count: int = Field(
         ..., description="Total repository count returned"
+    )
+    total_pages_fetched: int = Field(
+        default=1, description="Number of repository pages fetched from GitHub API"
+    )
+    has_more: bool = Field(
+        default=False, description="Whether more repositories exist beyond the pagination cap"
     )
     repositories: list[RepositoryItemSerializer] = Field(
         default_factory=list, description="Repository list"

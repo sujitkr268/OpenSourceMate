@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+from app.config import get_settings
 from app.schemas.serializers import (
     ExtendedGitHubUserProfileSerializer,
     GitHubUserProfileSerializer,
@@ -68,9 +69,17 @@ async def get_repositories(username: str):
             detail="GitHub user not found",
         )
 
+    settings = get_settings()
+    per_page = getattr(settings, "github_repos_per_page", 100)
+    cap = getattr(settings, "github_max_repos_cap", 300)
+    pages = (len(repositories) + per_page - 1) // per_page if repositories else 0
+    has_more = len(repositories) >= cap
+
     return {
         "username": validated_username,
         "repository_count": len(repositories),
+        "total_pages_fetched": max(1, pages) if repositories else 0,
+        "has_more": has_more,
         "repositories": [
             {
                 "name": repo["name"],

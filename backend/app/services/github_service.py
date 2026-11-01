@@ -108,14 +108,45 @@ async def get_github_user(username: str):
     return user
 
 
+LINK_HEADER_PATTERN = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+
+def parse_github_link_header(link_header: str | None) -> dict[str, str]:
+    """Parse RFC 5988 Link headers into a dict mapping relation names to URLs.
+
+    Example input:
+        '<https://api.github.com/users/foo/repos?page=2&per_page=100>; rel="next", '
+        '<https://api.github.com/users/foo/repos?page=4&per_page=100>; rel="last"'
+    Returns:
+        {"next": "https://...", "last": "https://..."}
+    """
+    if not link_header:
+        return {}
+
+    links: dict[str, str] = {}
+    for match in LINK_HEADER_PATTERN.finditer(link_header):
+        url, rel = match.groups()
+        links[rel.strip().lower()] = url.strip()
+
+    return links
+
+
 MAX_REPOSITORY_PAGES = 3
 REPOS_PER_PAGE = 100
+MAX_REPOSITORIES_CAP = 300
 
 
-async def get_user_repositories(username: str):
-    """Fetch public repositories for a user, following pagination up to MAX_REPOSITORY_PAGES.
+async def get_user_repositories(
+    username: str,
+    max_pages: int | None = None,
+    per_page: int | None = None,
+    max_cap: int | None = None,
+) -> list[dict] | None:
+    """Fetch public repositories for a user, following pagination up to a sensible cap.
 
-    Caps at 300 repositories (3 pages) so large profiles do not hang indefinitely.
+    Follows GitHub RFC 5988 Link headers and supports per_page navigation up to
+    max_pages / max_cap (Issue #129). Integrates seamlessly with rate-limit
+    detection (Issue #14) and TTL cache.
     """
     key = f"github:repos:{username.lower()}"
     cached = cache.get(key)
@@ -123,18 +154,34 @@ async def get_user_repositories(username: str):
     if cached is not None:
         return cached
 
-    repositories = []
+    settings = get_settings()
+    effective_max_pages = (
+        max_pages
+        if max_pages is not None
+        else getattr(settings, "github_max_repo_pages", MAX_REPOSITORY_PAGES)
+    )
+    effective_per_page = (
+        per_page
+        if per_page is not None
+        else getattr(settings, "github_repos_per_page", REPOS_PER_PAGE)
+    )
+    effective_cap = (
+        max_cap
+        if max_cap is not None
+        else getattr(settings, "github_max_repos_cap", MAX_REPOSITORIES_CAP)
+    )
 
-    for page in range(1, MAX_REPOSITORY_PAGES + 1):
-        params = {
-            "per_page": REPOS_PER_PAGE,
-            "sort": "updated",
-            "page": page,
-        }
+    repositories: list[dict] = []
+    next_url: str | None = f"{GITHUB_API_URL}/users/{username}/repos"
+    params: dict | None = {
+        "per_page": effective_per_page,
+        "sort": "updated",
+        "page": 1,
+    }
+    pages_fetched = 0
 
-        response = await github_get(
-            f"{GITHUB_API_URL}/users/{username}/repos", params=params
-        )
+    while next_url and pages_fetched < effective_max_pages:
+        response = await github_get(next_url, params=params)
 
         if response.status_code == 404:
             return None
@@ -146,11 +193,36 @@ async def get_user_repositories(username: str):
             break
 
         repositories.extend(page_repos)
+        pages_fetched += 1
 
-        if len(page_repos) < REPOS_PER_PAGE:
+        # Check if we have hit or exceeded the sensible upper bound cap
+        if len(repositories) >= effective_cap:
+            repositories = repositories[:effective_cap]
             break
 
-    cache.set(key, repositories, get_settings().github_cache_ttl)
+        # If this page returned fewer than requested items, we reached the end
+        if len(page_repos) < effective_per_page:
+            break
+
+        # Parse Link header to follow the next page
+        link_header = response.headers.get("Link") or response.headers.get("link")
+        links = parse_github_link_header(link_header)
+
+        if "next" in links:
+            next_url = links["next"]
+            params = None
+        elif pages_fetched < effective_max_pages:
+            # Fallback if Link header was omitted (e.g. lightweight mocks)
+            next_url = f"{GITHUB_API_URL}/users/{username}/repos"
+            params = {
+                "per_page": effective_per_page,
+                "sort": "updated",
+                "page": pages_fetched + 1,
+            }
+        else:
+            next_url = None
+
+    cache.set(key, repositories, settings.github_cache_ttl)
 
     return repositories
 
