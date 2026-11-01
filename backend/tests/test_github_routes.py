@@ -173,14 +173,16 @@ def test_skills_valid():
     assert response.status_code == 200
     assert body["username"] == "octocat"
     assert body["total_repositories_analyzed"] == 3
-    # type and weight are additive fields; the original three keys are unchanged.
-    assert body["skills"][0] == {
-        "name": "Python",
-        "repository_count": 2,
-        "percentage": 66.67,
-        "type": "language",
-        "weight": 1.0,
-    }
+    # type, weight, and proficiency indicators are additive fields; the original keys are unchanged.
+    skill_0 = body["skills"][0]
+    assert skill_0["name"] == "Python"
+    assert skill_0["repository_count"] == 2
+    assert skill_0["percentage"] == 66.67
+    assert skill_0["type"] == "language"
+    assert skill_0["weight"] == 1.0
+    assert skill_0["proficiency"] in ("Learning", "Comfortable", "Strong")
+    assert isinstance(skill_0["proficiency_score"], float)
+    assert "Estimated as" in skill_0["proficiency_reason"]
 
 
 def test_skills_zero_repos():

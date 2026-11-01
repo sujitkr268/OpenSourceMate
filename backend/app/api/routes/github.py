@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.serializers import (
+    ExtendedGitHubUserProfileSerializer,
     GitHubUserProfileSerializer,
     RepositoryListSerializer,
     UserSkillsSerializer,
@@ -21,7 +22,7 @@ router = APIRouter(
 
 @router.get(
     "/users/{username}",
-    response_model=GitHubUserProfileSerializer,
+    response_model=ExtendedGitHubUserProfileSerializer,
     summary="Get GitHub user profile",
 )
 async def get_user(username: str):
@@ -43,6 +44,12 @@ async def get_user(username: str):
         "followers": user.get("followers", 0),
         "following": user.get("following", 0),
         "profile_url": user["html_url"],
+        "location": user.get("location"),
+        "company": user.get("company"),
+        "blog": user.get("blog"),
+        "twitter_username": user.get("twitter_username"),
+        "created_at": user.get("created_at"),
+        "public_gists": user.get("public_gists", 0),
     }
 
 
@@ -85,7 +92,11 @@ async def get_repositories(username: str):
     response_model=UserSkillsSerializer,
     summary="Analyze GitHub user technical skills",
 )
-async def get_user_skills(username: str, include_forks: bool = False):
+async def get_user_skills(
+    username: str,
+    include_forks: bool = False,
+    include_proficiency: bool = True,
+):
     validated_username = validate_github_username(username)
     repositories = await get_user_repositories(validated_username)
 
@@ -97,7 +108,10 @@ async def get_user_skills(username: str, include_forks: bool = False):
 
     details = await get_repository_details(repositories)
     result = analyze_skills(
-        repositories, include_forks=include_forks, repo_details=details
+        repositories,
+        include_forks=include_forks,
+        repo_details=details,
+        compute_proficiency=include_proficiency,
     )
 
     return {

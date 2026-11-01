@@ -157,6 +157,18 @@ class SkillItemSerializer(BaseModel):
     weight: float | None = Field(
         default=None, description="Calculated skill weight"
     )
+    proficiency: str | None = Field(
+        default=None,
+        description="Estimated proficiency level: Learning, Comfortable, or Strong (Issue #131)",
+    )
+    proficiency_score: float | None = Field(
+        default=None,
+        description="Calculated proficiency score from 0.0 to 10.0 (Issue #131)",
+    )
+    proficiency_reason: str | None = Field(
+        default=None,
+        description="Explanation of how the proficiency estimate was computed (Issue #131)",
+    )
 
 
 class UserSkillsSerializer(BaseModel):

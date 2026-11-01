@@ -20,10 +20,18 @@ export interface GitHubUserProfile {
   public_gists?: number;
 }
 
+export type ProficiencyLevel = "Learning" | "Comfortable" | "Strong";
+
 export interface SkillItem {
   name: string;
   repository_count: number;
   percentage: number;
+  type?: string | null;
+  weight?: number | null;
+  proficiency?: ProficiencyLevel;
+  proficiency_score?: number;
+  proficiency_reason?: string;
+  group?: string | null;
 }
 
 export interface UserSkillsResponse {
