@@ -163,6 +163,14 @@ class SkillItemSerializer(BaseModel):
     weight: float | None = Field(
         default=None, description="Calculated skill weight"
     )
+    group: str | None = Field(
+        default=None,
+        description="Associated technology ecosystem or group name (Issue #130)",
+    )
+    subskills: list[str] | None = Field(
+        default=None,
+        description="Constituent technologies if this item represents a combined group (Issue #130)",
+    )
     proficiency: str | None = Field(
         default=None,
         description="Estimated proficiency level: Learning, Comfortable, or Strong (Issue #131)",
@@ -186,6 +194,10 @@ class UserSkillsSerializer(BaseModel):
     )
     total_repositories_analyzed: int = Field(
         ..., description="Total count of analyzed repositories"
+    )
+    groups: dict[str, list[str]] | None = Field(
+        default=None,
+        description="Mapping of active technology groups to present constituent skills (Issue #130)",
     )
 
 

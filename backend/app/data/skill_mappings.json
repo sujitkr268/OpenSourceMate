@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skill Mappings and Noise Language Configuration",
+  "description": "Configurable mapping file for technology grouping and noise filtering (Issue #130). Contributors can add new languages and groups here without touching Python code.",
+  "version": "1.0.0",
+  "ignore_languages": [
+    "Jupyter Notebook",
+    "Dockerfile",
+    "Makefile",
+    "CMake",
+    "TeX",
+    "Roff",
+    "PostScript",
+    "Rich Text Format",
+    "Gettext Catalog",
+    "Vim Script",
+    "Batchfile",
+    "Inno Setup",
+    "Protocol Buffer",
+    "INI"
+  ],
+  "groups": {
+    "Web": [
+      "HTML",
+      "CSS",
+      "SCSS",
+      "Sass",
+      "Less"
+    ],
+    "JavaScript / TypeScript": [
+      "JavaScript",
+      "TypeScript"
+    ],
+    "C / C++": [
+      "C",
+      "C++"
+    ],
+    "JVM Ecosystem": [
+      "Java",
+      "Scala",
+      "Groovy",
+      "Clojure"
+    ],
+    "Mobile Development": [
+      "Swift",
+      "Kotlin",
+      "Dart",
+      "Objective-C"
+    ],
+    "Systems & Embedded": [
+      "Rust",
+      "Zig"
+    ],
+    "Cloud & Infrastructure": [
+      "HCL",
+      "Terraform",
+      "Puppet",
+      "Chef"
+    ]
+  },
+  "descriptions": {
+    "Web": "Frontend web presentation, layout and stylesheet languages",
+    "JavaScript / TypeScript": "Core modern web client and server scripting ecosystem",
+    "C / C++": "Native high-performance systems and application programming languages",
+    "JVM Ecosystem": "Java virtual machine interoperable languages and enterprise tools",
+    "Mobile Development": "Native iOS, Android, and cross-platform mobile languages",
+    "Systems & Embedded": "Low-level memory-managed and bare-metal systems languages",
+    "Cloud & Infrastructure": "Declarative infrastructure as code and provisioning languages"
+  }
+}
