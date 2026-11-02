@@ -346,15 +346,23 @@ If you are already inside the `backend/` or `frontend/` directory:
 
 | Variable | Location | Required? | Description |
 |---|---|---|---|
+| `ENVIRONMENT` | `backend/.env` | No | Target runtime environment: `development` (default), `production`, or `testing`. Controls security assertions and defaults. |
+| `DEBUG` | `backend/.env` | No | Enables FastAPI debug mode. In development, defaults to `True`. In production, strictly defaults to `False` (setting `True` in production fails loudly). |
+| `SECRET_KEY` | `backend/.env` | Dev: No, Prod: **Yes** | Cryptographic secret key. In development, a default dev key is used. In production, **strictly required** (minimum 16 characters); startup fails loudly if unset or default. |
+| `ALLOWED_HOSTS` | `backend/.env` | No | Comma-separated list of allowed HTTP Host headers for `TrustedHostMiddleware`. Safe default: `*` (permits all hosts). In production, configure exact domain names. |
+| `CORS_ORIGINS` | `backend/.env` | No | Comma-separated list of allowed frontend origins. Default: `http://localhost:3000,http://127.0.0.1:3000,https://open-source-mate-tawny.vercel.app`. |
+| `CORS_ALLOW_CREDENTIALS` | `backend/.env` | No | Boolean indicating whether cross-origin cookies and authorization headers are supported. Safe default: `False`. |
+| `CORS_ALLOW_METHODS` | `backend/.env` | No | Comma-separated list of permitted HTTP methods. Default: `*`. |
+| `CORS_ALLOW_HEADERS` | `backend/.env` | No | Comma-separated list of permitted HTTP headers. Default: `*`. |
 | `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | No | Base URL of the FastAPI backend server accessed by the Next.js frontend. Safe default: `http://localhost:8000`. No credentials needed. |
 | `GITHUB_TOKEN` | `backend/.env` | No | GitHub Personal Access Token (classic or fine-grained). Raises GitHub REST API rate limits from 60 to 5,000 requests/hour. Safe default: empty (unauthenticated requests). To obtain one, navigate to GitHub **Settings > Developer Settings > Personal access tokens** and generate a token (public read-only access is sufficient). |
 | `GITHUB_CACHE_TTL` | `backend/.env` | No | In-memory cache duration (in seconds) for GitHub profile and repository API responses. Safe default: `300` (5 minutes). Set to `0` to disable in-memory caching during development. No credentials needed. |
 | `AI_API_KEY` | `backend/.env` | No | OpenAI API key used for optional AI-powered issue analysis (`/api/ai/analyze-issue`). Safe default: empty (AI analysis endpoints return graceful fallback recommendations without errors). To obtain one, generate an API key at [platform.openai.com](https://platform.openai.com/). |
 | `AI_MODEL` | `backend/.env` | No | Model name passed to OpenAI when `AI_API_KEY` is set. Safe default: `gpt-4o-mini`. No credentials needed. |
 
-> **Framework Notes:**
-> - The backend is implemented in **FastAPI** using Pydantic Settings. It does not use Django, so Django-specific settings (`SECRET_KEY`, `DEBUG`) are not required or supported.
-> - The AI integration uses OpenAI via `AI_API_KEY` and `AI_MODEL` in the backend; other variables like `OPENAI_API_KEY` or `GOOGLE_API_KEY` are not read by the current codebase.
+> **Dev vs. Production Separation:**
+> - In **development** (`ENVIRONMENT=development`), `DEBUG` defaults to `True` and an insecure default `SECRET_KEY` is allowed so developers can run `uvicorn app.main:app --reload` immediately without configuration.
+> - In **production** (`ENVIRONMENT=production`), the application enforces strict production invariants: `DEBUG` must be `False`, and `SECRET_KEY` must be a high-entropy string of at least 16 characters. If `SECRET_KEY` is unset, empty, or using the default key, the application **fails loudly on startup** with a descriptive `ValueError`.
 > - Never expose server-side credentials or API keys in the frontend (`NEXT_PUBLIC_*`). Only public configuration (such as the backend API URL) should be placed in `frontend/.env.local`.
 
 **Never commit API keys, passwords, tokens, or other secrets to Git.**

@@ -10,6 +10,7 @@ from app.api.routes.ai import router as ai_router
 from app.api.routes.github import router as github_router
 from app.api.routes.issues import router as issues_router
 from app.api.routes.matching import router as matching_router
+from app.config import get_settings
 from app.exceptions import APIException
 from app.schemas.serializers import (
     HealthDiagnosticsSerializer,
@@ -21,6 +22,7 @@ from app.services.github_service import (
     close_client,
     get_github_diagnostics,
 )
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 
 @asynccontextmanager
@@ -29,24 +31,25 @@ async def lifespan(app: FastAPI):
     await close_client()
 
 
+settings = get_settings()
+
 app = FastAPI(
     title="OpenSourceMate API",
     description="AI-powered open-source contribution assistant",
     version="0.1.0",
+    debug=settings.debug,
     lifespan=lifespan,
 )
 
+if settings.allowed_hosts and "*" not in settings.allowed_hosts:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://open-source-mate-tawny.vercel.app",
-    ],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.cors_origins,
+    allow_credentials=settings.cors_allow_credentials,
+    allow_methods=settings.cors_allow_methods,
+    allow_headers=settings.cors_allow_headers,
 )
 
 
