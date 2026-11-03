@@ -197,7 +197,7 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-Configure environment variables (optional, see [Environment Variables](#-environment-variables)):
+Configure environment variables (optional, see [Environment Variables](#environment-variables)):
 
 ### Windows (PowerShell)
 
@@ -299,68 +299,60 @@ Common error codes:
 
 ---
 
-## 🔐 Environment Variables
+## Environment Variables
 
 OpenSourceMate uses environment variables to configure the Next.js frontend and FastAPI backend.
 
 ### Key Guidelines
 
 - **Zero-credential local setup**: All variables have safe defaults. You can run the entire frontend and backend locally without supplying any external API keys or tokens.
-- **Optional features**: Integrations such as higher GitHub API rate limits and AI-assisted issue analysis are optional. If you wish to test or develop these features, you must provide your own credentials.
+- **Optional features**: Integrations such as higher GitHub API rate limits, AI-assisted issue analysis, and semantic matching are optional. If you wish to test or develop these features, you can provide your own credentials.
 - **Secret security**: **Never commit `.env` or `.env.local` files, API keys, passwords, or personal access tokens to Git.** These files are ignored by `.gitignore`.
 
-### Template Setup Instructions
+### Setup Instructions
 
-Each component includes a `.env.example` template with supported variables. Copy the templates to initialize your local environment files:
+To configure your local environment:
 
-#### From the Repository Root
-
-**Windows (PowerShell):**
-
-```powershell
-Copy-Item backend\.env.example backend\.env
-Copy-Item frontend\.env.example frontend\.env.local
-```
-
-**macOS / Linux:**
-
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
-```
-
-#### From Component Directories
-
-If you are already inside the `backend/` or `frontend/` directory:
-
-- **Backend (`backend/`):**
-  - Windows (PowerShell): `Copy-Item .env.example .env`
-  - macOS / Linux: `cp .env.example .env`
-- **Frontend (`frontend/`):**
-  - Windows (PowerShell): `Copy-Item .env.example .env.local`
-  - macOS / Linux: `cp .env.example .env.local`
-
-> **Note for Frontend:** Next.js loads local overrides from `.env.local`. Do not name the frontend file `.env` if you want local development overrides to follow Next.js conventions.
+1. **Copy `backend/.env.example` to `backend/.env`:**
+   - Windows (PowerShell): `Copy-Item backend\.env.example backend\.env`
+   - macOS / Linux: `cp backend/.env.example backend/.env`
+2. **Copy `frontend/.env.example` to `frontend/.env.local`:**
+   - Windows (PowerShell): `Copy-Item frontend\.env.example frontend\.env.local`
+   - macOS / Linux: `cp frontend/.env.example frontend/.env.local`
+   *(Note: Next.js loads environment variables from `.env`, `.env.development`, and `.env.local`. For local development, copying to `.env.local` is recommended because it takes precedence and is excluded from source control by default).*
+3. **Replace placeholder values with your own credentials:**
+   - Edit the newly created `.env` files and replace placeholder values with your own API keys or tokens (e.g., `GITHUB_TOKEN` for higher rate limits or `AI_API_KEY` for AI analysis).
+4. **Configure the correct backend API URL:**
+   - Verify `NEXT_PUBLIC_API_URL` in `frontend/.env.local` points to your backend instance (`http://localhost:8000` for local development).
+5. **Never commit actual `.env` files or credentials:**
+   - Ensure local `.env` and `.env.local` files remain uncommitted and untracked.
 
 ### Supported Environment Variables
 
-| Variable | Location | Required? | Description |
+| Variable | Location | Required | Description |
 |---|---|---|---|
-| `ENVIRONMENT` | `backend/.env` | No | Target runtime environment: `development` (default), `production`, or `testing`. Controls security assertions and defaults. |
-| `DEBUG` | `backend/.env` | No | Enables FastAPI debug mode. In development, defaults to `True`. In production, strictly defaults to `False` (setting `True` in production fails loudly). |
-| `SECRET_KEY` | `backend/.env` | Dev: No, Prod: **Yes** | Cryptographic secret key. In development, a default dev key is used. In production, **strictly required** (minimum 16 characters); startup fails loudly if unset or default. |
-| `ALLOWED_HOSTS` | `backend/.env` | No | Comma-separated list of allowed HTTP Host headers for `TrustedHostMiddleware`. Safe default: `*` (permits all hosts). In production, configure exact domain names. |
-| `CORS_ORIGINS` | `backend/.env` | No | Comma-separated list of allowed frontend origins. Default: `http://localhost:3000,http://127.0.0.1:3000,https://open-source-mate-tawny.vercel.app`. |
-| `CORS_ALLOW_CREDENTIALS` | `backend/.env` | No | Boolean indicating whether cross-origin cookies and authorization headers are supported. Safe default: `False`. |
-| `CORS_ALLOW_METHODS` | `backend/.env` | No | Comma-separated list of permitted HTTP methods. Default: `*`. |
-| `CORS_ALLOW_HEADERS` | `backend/.env` | No | Comma-separated list of permitted HTTP headers. Default: `*`. |
-| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | No | Base URL of the FastAPI backend server accessed by the Next.js frontend. Safe default: `http://localhost:8000`. No credentials needed. |
-| `GITHUB_TOKEN` | `backend/.env` | No | GitHub Personal Access Token (classic or fine-grained). Raises GitHub REST API rate limits from 60 to 5,000 requests/hour. Safe default: empty (unauthenticated requests). To obtain one, navigate to GitHub **Settings > Developer Settings > Personal access tokens** and generate a token (public read-only access is sufficient). |
-| `GITHUB_CACHE_TTL` | `backend/.env` | No | In-memory cache duration (in seconds) for GitHub profile and repository API responses. Safe default: `300` (5 minutes). Set to `0` to disable in-memory caching during development. No credentials needed. |
-| `AI_API_KEY` | `backend/.env` | No | OpenAI API key used for optional AI-powered issue analysis (`/api/ai/analyze-issue`). Safe default: empty (AI analysis endpoints return graceful fallback recommendations without errors). To obtain one, generate an API key at [platform.openai.com](https://platform.openai.com/). |
-| `AI_MODEL` | `backend/.env` | No | Model name passed to OpenAI when `AI_API_KEY` is set. Safe default: `gpt-4o-mini`. No credentials needed. |
+| `ENVIRONMENT` | `backend/.env` | Dev: No, Prod: No | Target runtime environment: `development` (default), `production`, or `testing`. Controls security assertions and defaults. |
+| `DEBUG` | `backend/.env` | Dev: No, Prod: No | Enables FastAPI debug mode. In development, defaults to `True`. In production, strictly defaults to `False` (setting `True` in production fails loudly). |
+| `SECRET_KEY` | `backend/.env` | Dev: No, Prod: **Yes** | Cryptographic secret key for signing and security. In development, a default dev key is used. In production, **strictly required** (minimum 16 characters); startup fails loudly if unset or default. |
+| `ALLOWED_HOSTS` | `backend/.env` | Dev: No, Prod: No | Comma-separated list or JSON array of allowed HTTP Host headers for `TrustedHostMiddleware`. Safe default: `["*"]` (permits all hosts). In production, configure exact domain names. |
+| `CORS_ORIGINS` | `backend/.env` | Dev: No, Prod: No | Comma-separated list or JSON array of allowed frontend origins. Default: `["http://localhost:3000", "http://127.0.0.1:3000", "https://open-source-mate-tawny.vercel.app"]`. |
+| `CORS_ALLOW_CREDENTIALS` | `backend/.env` | Dev: No, Prod: No | Boolean indicating whether cross-origin cookies and authorization headers are supported. Safe default: `False`. |
+| `CORS_ALLOW_METHODS` | `backend/.env` | Dev: No, Prod: No | Comma-separated list or JSON array of permitted HTTP methods. Default: `["*"]`. |
+| `CORS_ALLOW_HEADERS` | `backend/.env` | Dev: No, Prod: No | Comma-separated list or JSON array of permitted HTTP headers. Default: `["*"]`. |
+| `GITHUB_TOKEN` | `backend/.env` | Dev: No, Prod: No | GitHub Personal Access Token (classic or fine-grained). Raises GitHub REST API rate limits from 60 to 5,000 requests/hour. Safe default: empty (unauthenticated requests). To obtain one, navigate to GitHub **Settings > Developer Settings > Personal access tokens** and generate a token (public read-only access is sufficient). |
+| `GITHUB_CACHE_TTL` | `backend/.env` | Dev: No, Prod: No | In-memory cache duration (in seconds) for GitHub profile and repository API responses. Safe default: `300` (5 minutes). Set to `0` to disable in-memory caching during development. |
+| `GITHUB_MAX_REPO_PAGES` | `backend/.env` | Dev: No, Prod: No | Maximum number of pagination calls permitted per user profile fetch. Safe default: `3`. |
+| `GITHUB_REPOS_PER_PAGE` | `backend/.env` | Dev: No, Prod: No | Number of repositories requested per page from the GitHub API (maximum allowed by GitHub is 100). Safe default: `100`. |
+| `GITHUB_MAX_REPOS_CAP` | `backend/.env` | Dev: No, Prod: No | Sensible ceiling for total repositories analyzed per user profile. Safe default: `300`. |
+| `AI_API_KEY` | `backend/.env` | Dev: No, Prod: No | OpenAI API key used for optional AI-powered issue analysis (`/api/ai/analyze-issue`). Safe default: empty (AI analysis endpoints return graceful fallback recommendations without errors). To obtain one, generate an API key at [platform.openai.com](https://platform.openai.com/). |
+| `AI_MODEL` | `backend/.env` | Dev: No, Prod: No | Model name passed to OpenAI when `AI_API_KEY` is set. Safe default: `gpt-4o-mini`. |
+| `GEMINI_API_KEY` | `backend/.env` | Dev: No, Prod: No | Optional Google Gemini API key supported by `AISettings`. Safe default: empty. |
+| `OSM_MAX_EXPLANATION_WORDS` | `backend/.env` | Dev: No, Prod: No | Maximum word count for AI-generated issue match explanations. Safe default: `50`. |
+| `OSM_USE_EMBEDDINGS` | `backend/.env` | Dev: No, Prod: No | Flag (`true`/`false`) to enable optional semantic sentence-transformers embeddings for issue matching. Safe default: `false`. |
+| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | Dev: No, Prod: **Yes** | Base URL of the FastAPI backend server accessed by the Next.js frontend. Safe default: `http://localhost:8000`. In production, set to your deployed backend API URL. |
 
-> **Dev vs. Production Separation:**
+> **Framework & Dev/Prod Notes:**
+> - The backend is implemented in **FastAPI** using Pydantic Settings, not Django. Django-specific settings are not used.
 > - In **development** (`ENVIRONMENT=development`), `DEBUG` defaults to `True` and an insecure default `SECRET_KEY` is allowed so developers can run `uvicorn app.main:app --reload` immediately without configuration.
 > - In **production** (`ENVIRONMENT=production`), the application enforces strict production invariants: `DEBUG` must be `False`, and `SECRET_KEY` must be a high-entropy string of at least 16 characters. If `SECRET_KEY` is unset, empty, or using the default key, the application **fails loudly on startup** with a descriptive `ValueError`.
 > - Never expose server-side credentials or API keys in the frontend (`NEXT_PUBLIC_*`). Only public configuration (such as the backend API URL) should be placed in `frontend/.env.local`.
