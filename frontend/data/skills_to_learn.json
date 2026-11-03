@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skills to Learn Next Mapping",
+  "description": "Static mapping from common developer skills to natural next-step and companion technologies. Easily extensible through pull requests.",
+  "version": "1.0.0",
+  "mappings": {
+    "Python": [
+      "Django",
+      "FastAPI",
+      "Flask",
+      "PyTorch",
+      "pandas"
+    ],
+    "JavaScript": [
+      "TypeScript",
+      "React",
+      "Node.js",
+      "Next.js",
+      "Vue"
+    ],
+    "TypeScript": [
+      "Next.js",
+      "React",
+      "Node.js",
+      "NestJS",
+      "GraphQL"
+    ],
+    "React": [
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "Redux",
+      "React Native"
+    ],
+    "Vue": [
+      "Nuxt.js",
+      "TypeScript",
+      "Pinia",
+      "Tailwind CSS",
+      "Vite"
+    ],
+    "Angular": [
+      "TypeScript",
+      "RxJS",
+      "NgRx",
+      "NestJS",
+      "Tailwind CSS"
+    ],
+    "Svelte": [
+      "SvelteKit",
+      "TypeScript",
+      "Tailwind CSS",
+      "Vite"
+    ],
+    "Node.js": [
+      "Express",
+      "NestJS",
+      "TypeScript",
+      "Prisma",
+      "PostgreSQL"
+    ],
+    "Express": [
+      "NestJS",
+      "TypeScript",
+      "MongoDB",
+      "PostgreSQL",
+      "Docker"
+    ],
+    "Java": [
+      "Spring Boot",
+      "Kotlin",
+      "Micronaut",
+      "Quarkus",
+      "Gradle"
+    ],
+    "Kotlin": [
+      "Android",
+      "Jetpack Compose",
+      "Ktor",
+      "Coroutines",
+      "Spring Boot"
+    ],
+    "Go": [
+      "Docker",
+      "Kubernetes",
+      "gRPC",
+      "Gin",
+      "Prometheus"
+    ],
+    "Rust": [
+      "WebAssembly",
+      "Tokio",
+      "Actix Web",
+      "Axum",
+      "Tauri"
+    ],
+    "C++": [
+      "CMake",
+      "Rust",
+      "Qt",
+      "Boost",
+      "Vulkan"
+    ],
+    "C": [
+      "C++",
+      "Rust",
+      "Linux Kernel",
+      "Embedded Systems",
+      "Makefile"
+    ],
+    "C#": [
+      ".NET",
+      "ASP.NET Core",
+      "Entity Framework",
+      "Azure",
+      "Blazor"
+    ],
+    ".NET": [
+      "ASP.NET Core",
+      "Entity Framework",
+      "Azure",
+      "C#",
+      "Blazor"
+    ],
+    "Ruby": [
+      "Ruby on Rails",
+      "RSpec",
+      "Sidekiq",
+      "PostgreSQL",
+      "Sinatra"
+    ],
+    "PHP": [
+      "Laravel",
+      "Symfony",
+      "Composer",
+      "WordPress",
+      "Livewire"
+    ],
+    "Swift": [
+      "SwiftUI",
+      "Combine",
+      "iOS",
+      "CoreData",
+      "Vapor"
+    ],
+    "HTML": [
+      "CSS",
+      "JavaScript",
+      "Tailwind CSS",
+      "Bootstrap",
+      "Web Accessibility"
+    ],
+    "CSS": [
+      "Tailwind CSS",
+      "Sass",
+      "PostCSS",
+      "JavaScript",
+      "Responsive Design"
+    ],
+    "SQL": [
+      "PostgreSQL",
+      "Prisma",
+      "Redis",
+      "MongoDB",
+      "Database Optimization"
+    ],
+    "PostgreSQL": [
+      "Prisma",
+      "Redis",
+      "Docker",
+      "Database Optimization",
+      "GraphQL"
+    ],
+    "MongoDB": [
+      "Mongoose",
+      "Node.js",
+      "Express",
+      "Redis",
+      "Docker"
+    ],
+    "Docker": [
+      "Kubernetes",
+      "Helm",
+      "CI/CD",
+      "Terraform",
+      "GitHub Actions"
+    ],
+    "Kubernetes": [
+      "Helm",
+      "Terraform",
+      "Prometheus",
+      "Istio",
+      "Cloud Architecture"
+    ],
+    "Dart": [
+      "Flutter",
+      "Firebase",
+      "State Management",
+      "Bloc"
+    ],
+    "Flutter": [
+      "Dart",
+      "Firebase",
+      "State Management",
+      "Riverpod",
+      "Clean Architecture"
+    ],
+    "Shell": [
+      "Bash",
+      "Linux",
+      "Docker",
+      "CI/CD",
+      "Ansible"
+    ],
+    "R": [
+      "RStudio",
+      "Shiny",
+      "tidyverse",
+      "ggplot2",
+      "Machine Learning"
+    ],
+    "Scala": [
+      "Apache Spark",
+      "Akka",
+      "Play Framework",
+      "Kafka",
+      "Cats"
+    ],
+    "Elixir": [
+      "Phoenix",
+      "LiveView",
+      "Erlang",
+      "OTP",
+      "Ecto"
+    ]
+  }
+}
