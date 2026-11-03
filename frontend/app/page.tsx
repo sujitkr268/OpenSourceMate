@@ -6,6 +6,7 @@ import ProfileCard from "../components/ProfileCard";
 import RecentSearches from "../components/RecentSearches";
 import SkillChart from "../components/SkillChart";
 import SkillProficiencyBadge from "../components/SkillProficiencyBadge";
+import SkillsToLearn from "../components/SkillsToLearn";
 import {
   type GitHubUserProfile as Profile,
   type SkillItem as Skill,
@@ -763,6 +764,12 @@ export default function Home() {
                             />
                           ))}
                         </div>
+
+                        <SkillsToLearn
+                          skills={skills.skills}
+                          theme={theme}
+                          className="mt-8"
+                        />
                       </>
                     )}
                   </div>
