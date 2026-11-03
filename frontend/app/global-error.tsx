@@ -21,9 +21,7 @@ export default function GlobalError({
               🚨
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Critical System Error
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Critical System Error</h1>
 
             <p className="mt-3 text-sm text-gray-400 leading-6">
               A critical layout error occurred in OpenSourceMate. We apologize for the
@@ -48,9 +46,7 @@ export default function GlobalError({
             </div>
 
             {error.digest && (
-              <p className="mt-8 font-mono text-[11px] text-gray-600">
-                Digest: {error.digest}
-              </p>
+              <p className="mt-8 font-mono text-[11px] text-gray-600">Digest: {error.digest}</p>
             )}
           </div>
         </main>

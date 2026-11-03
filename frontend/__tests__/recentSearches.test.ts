@@ -19,10 +19,7 @@ describe("Recent Searches Storage Utilities", () => {
     });
 
     it("returns stored list of usernames", () => {
-      localStorage.setItem(
-        RECENT_SEARCHES_STORAGE_KEY,
-        JSON.stringify(["torvalds", "gaearon"])
-      );
+      localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(["torvalds", "gaearon"]));
       expect(getRecentSearches()).toEqual(["torvalds", "gaearon"]);
     });
 
@@ -36,10 +33,7 @@ describe("Recent Searches Storage Utilities", () => {
 
     it("caps retrieved results at MAX_RECENT_SEARCHES (5)", () => {
       const sevenUsers = ["u1", "u2", "u3", "u4", "u5", "u6", "u7"];
-      localStorage.setItem(
-        RECENT_SEARCHES_STORAGE_KEY,
-        JSON.stringify(sevenUsers)
-      );
+      localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(sevenUsers));
       expect(getRecentSearches().length).toBe(MAX_RECENT_SEARCHES);
       expect(getRecentSearches()).toEqual(["u1", "u2", "u3", "u4", "u5"]);
     });

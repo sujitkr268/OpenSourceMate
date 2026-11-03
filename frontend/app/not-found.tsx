@@ -34,8 +34,8 @@ export default function NotFound() {
         </h2>
 
         <p className="mt-3 text-sm leading-6 text-gray-400 sm:text-base">
-          The page or route you were looking for doesn&apos;t exist, has been removed,
-          or has moved to a new URL. Don&apos;t worry—your open-source journey isn&apos;t lost!
+          The page or route you were looking for doesn&apos;t exist, has been removed, or has moved
+          to a new URL. Don&apos;t worry—your open-source journey isn&apos;t lost!
         </p>
 
         {/* Interactive Action Cards & Links */}
@@ -52,12 +52,8 @@ export default function NotFound() {
                 →
               </span>
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-white">
-              Home Page
-            </h3>
-            <p className="mt-1 text-xs text-gray-400">
-              Return to the landing page and overview.
-            </p>
+            <h3 className="mt-3 text-sm font-semibold text-white">Home Page</h3>
+            <p className="mt-1 text-xs text-gray-400">Return to the landing page and overview.</p>
           </Link>
 
           <Link
@@ -72,9 +68,7 @@ export default function NotFound() {
                 →
               </span>
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-white">
-              Profile Analyzer
-            </h3>
+            <h3 className="mt-3 text-sm font-semibold text-white">Profile Analyzer</h3>
             <p className="mt-1 text-xs text-gray-400">
               Analyze your GitHub profile and discover issues.
             </p>

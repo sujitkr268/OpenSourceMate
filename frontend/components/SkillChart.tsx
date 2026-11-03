@@ -20,13 +20,13 @@ export interface SkillChartProps {
 // Harmonious, high-contrast, accessible color palette
 const CHART_PALETTE = [
   { fill: "#8b5cf6", stroke: "#7c3aed", name: "Purple", text: "#c4b5fd" }, // Purple
-  { fill: "#3b82f6", stroke: "#2563eb", name: "Blue", text: "#93c5fd" },   // Blue
-  { fill: "#10b981", stroke: "#059669", name: "Emerald", text: "#6ee7b7" },// Emerald
-  { fill: "#f59e0b", stroke: "#d97706", name: "Amber", text: "#fcd34d" },  // Amber
-  { fill: "#ec4899", stroke: "#db2777", name: "Pink", text: "#f472b6" },   // Pink
-  { fill: "#06b6d4", stroke: "#0891b2", name: "Cyan", text: "#67e8f9" },   // Cyan
+  { fill: "#3b82f6", stroke: "#2563eb", name: "Blue", text: "#93c5fd" }, // Blue
+  { fill: "#10b981", stroke: "#059669", name: "Emerald", text: "#6ee7b7" }, // Emerald
+  { fill: "#f59e0b", stroke: "#d97706", name: "Amber", text: "#fcd34d" }, // Amber
+  { fill: "#ec4899", stroke: "#db2777", name: "Pink", text: "#f472b6" }, // Pink
+  { fill: "#06b6d4", stroke: "#0891b2", name: "Cyan", text: "#67e8f9" }, // Cyan
   { fill: "#6366f1", stroke: "#4f46e5", name: "Indigo", text: "#a5b4fc" }, // Indigo
-  { fill: "#14b8a6", stroke: "#0d9488", name: "Teal", text: "#5eead4" },   // Teal
+  { fill: "#14b8a6", stroke: "#0d9488", name: "Teal", text: "#5eead4" }, // Teal
 ];
 
 export default function SkillChart({
@@ -43,17 +43,12 @@ export default function SkillChart({
   const [showTable, setShowTable] = useState(false);
 
   // Filter and sort top skills
-  const sortedSkills = [...skills].sort(
-    (a, b) => b.repository_count - a.repository_count
-  );
+  const sortedSkills = [...skills].sort((a, b) => b.repository_count - a.repository_count);
   const topSkills = sortedSkills.slice(0, topN);
 
   // If there are remaining skills, group them into "Other"
   const remainingSkills = sortedSkills.slice(topN);
-  const otherRepoCount = remainingSkills.reduce(
-    (sum, s) => sum + s.repository_count,
-    0
-  );
+  const otherRepoCount = remainingSkills.reduce((sum, s) => sum + s.repository_count, 0);
   const otherPercentage = Number(
     remainingSkills.reduce((sum, s) => sum + s.percentage, 0).toFixed(1)
   );
@@ -92,9 +87,7 @@ export default function SkillChart({
         >
           📊
         </div>
-        <h4 className="text-base font-semibold text-gray-200">
-          No Skill Data Available
-        </h4>
+        <h4 className="text-base font-semibold text-gray-200">No Skill Data Available</h4>
         <p className="mt-1.5 text-xs text-gray-500">
           No public repository language data detected yet to generate a distribution chart.
         </p>
@@ -126,17 +119,12 @@ export default function SkillChart({
   });
 
   // Bar Chart calculations
-  const maxRepoCount = Math.max(
-    ...displaySkills.map((s) => s.repository_count),
-    1
-  );
+  const maxRepoCount = Math.max(...displaySkills.map((s) => s.repository_count), 1);
 
   return (
     <div
       className={`rounded-2xl border p-5 sm:p-6 transition-all ${
-        theme === "dark"
-          ? "border-white/10 bg-white/[0.02]"
-          : "border-gray-200 bg-white shadow-sm"
+        theme === "dark" ? "border-white/10 bg-white/[0.02]" : "border-gray-200 bg-white shadow-sm"
       } ${className}`}
       role="region"
       aria-labelledby={`chart-title-${chartId}`}
@@ -155,23 +143,16 @@ export default function SkillChart({
               Skill Distribution Chart
             </h4>
           </div>
-          <p
-            className={`mt-1 text-xs ${
-              theme === "dark" ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
+          <p className={`mt-1 text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
             Visual breakdown of technical languages across{" "}
-            {totalRepositories > 0 ? `${totalRepositories} ` : ""}analyzed
-            repositories.
+            {totalRepositories > 0 ? `${totalRepositories} ` : ""}analyzed repositories.
           </p>
         </div>
 
         {/* View Switcher Tabs (Donut vs Bar) */}
         <div
           className={`inline-flex rounded-xl p-1 border text-xs font-semibold ${
-            theme === "dark"
-              ? "border-white/10 bg-black/40"
-              : "border-gray-300 bg-gray-100"
+            theme === "dark" ? "border-white/10 bg-black/40" : "border-gray-300 bg-gray-100"
           }`}
           role="tablist"
           aria-label="Chart representation modes"
@@ -185,8 +166,8 @@ export default function SkillChart({
               chartType === "donut"
                 ? "bg-purple-600 text-white shadow-sm"
                 : theme === "dark"
-                ? "text-gray-400 hover:text-white"
-                : "text-gray-600 hover:text-black"
+                  ? "text-gray-400 hover:text-white"
+                  : "text-gray-600 hover:text-black"
             }`}
           >
             Donut
@@ -200,8 +181,8 @@ export default function SkillChart({
               chartType === "bar"
                 ? "bg-purple-600 text-white shadow-sm"
                 : theme === "dark"
-                ? "text-gray-400 hover:text-white"
-                : "text-gray-600 hover:text-black"
+                  ? "text-gray-400 hover:text-white"
+                  : "text-gray-600 hover:text-black"
             }`}
           >
             Horizontal Bar
@@ -276,7 +257,15 @@ export default function SkillChart({
                 <>
                   <span
                     className="text-xs font-semibold uppercase tracking-wider"
-                    style={{ color: activeSkill.name === "Other Technologies" ? "#94a3b8" : CHART_PALETTE[displaySkills.findIndex(s => s.name === activeSkill.name) % CHART_PALETTE.length]?.text || "#c4b5fd" }}
+                    style={{
+                      color:
+                        activeSkill.name === "Other Technologies"
+                          ? "#94a3b8"
+                          : CHART_PALETTE[
+                              displaySkills.findIndex((s) => s.name === activeSkill.name) %
+                                CHART_PALETTE.length
+                            ]?.text || "#c4b5fd",
+                    }}
                   >
                     {activeSkill.name}
                   </span>
@@ -284,9 +273,7 @@ export default function SkillChart({
                     {activeSkill.percentage}%
                   </span>
                   <span
-                    className={`text-xs ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-500"
-                    }`}
+                    className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
                   >
                     {activeSkill.repository_count}{" "}
                     {activeSkill.repository_count === 1 ? "repo" : "repos"}
@@ -297,13 +284,9 @@ export default function SkillChart({
                   <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">
                     Specialized
                   </span>
-                  <span className="text-3xl font-extrabold tracking-tight">
-                    100%
-                  </span>
+                  <span className="text-3xl font-extrabold tracking-tight">100%</span>
                   <span
-                    className={`text-xs ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-500"
-                    }`}
+                    className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
                   >
                     {skills[0].name}
                   </span>
@@ -321,9 +304,7 @@ export default function SkillChart({
                     {displaySkills.length}
                   </span>
                   <span
-                    className={`text-xs ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-500"
-                    }`}
+                    className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
                   >
                     Languages
                   </span>
@@ -335,12 +316,13 @@ export default function SkillChart({
 
         {/* HORIZONTAL BAR REPRESENTATION */}
         {chartType === "bar" && (
-          <div className="w-full flex-1 space-y-3.5" role="list" aria-label="Skill distribution bar breakdown">
+          <div
+            className="w-full flex-1 space-y-3.5"
+            role="list"
+            aria-label="Skill distribution bar breakdown"
+          >
             {displaySkills.map((skill) => {
-              const barWidth = Math.max(
-                (skill.repository_count / maxRepoCount) * 100,
-                4
-              );
+              const barWidth = Math.max((skill.repository_count / maxRepoCount) * 100, 4);
               const isHovered = activeSkill?.name === skill.name;
 
               return (
@@ -377,12 +359,9 @@ export default function SkillChart({
                           theme === "dark" ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        {skill.repository_count}{" "}
-                        {skill.repository_count === 1 ? "repo" : "repos"}
+                        {skill.repository_count} {skill.repository_count === 1 ? "repo" : "repos"}
                       </span>
-                      <span className="font-mono font-bold text-xs">
-                        {skill.percentage}%
-                      </span>
+                      <span className="font-mono font-bold text-xs">{skill.percentage}%</span>
                     </div>
                   </div>
 
@@ -416,9 +395,7 @@ export default function SkillChart({
             <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
               Skill Legend
             </span>
-            <span className="text-xs text-gray-500">
-              {displaySkills.length} items
-            </span>
+            <span className="text-xs text-gray-500">{displaySkills.length} items</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
@@ -428,15 +405,11 @@ export default function SkillChart({
                 <button
                   key={skill.name}
                   type="button"
-                  onClick={() =>
-                    setActiveSkill(activeSkill?.name === skill.name ? null : skill)
-                  }
+                  onClick={() => setActiveSkill(activeSkill?.name === skill.name ? null : skill)}
                   onMouseEnter={() => setActiveSkill(skill)}
                   onMouseLeave={() => setActiveSkill(null)}
                   className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 ${
-                    isHovered
-                      ? "bg-white/10 ring-1 ring-white/20"
-                      : "hover:bg-white/5"
+                    isHovered ? "bg-white/10 ring-1 ring-white/20" : "hover:bg-white/5"
                   }`}
                   aria-pressed={isHovered}
                   aria-label={`Highlight ${skill.name} in chart`}
@@ -450,9 +423,7 @@ export default function SkillChart({
                     <span className="truncate font-medium">{skill.name}</span>
                   </div>
 
-                  <span className="font-semibold text-gray-400 ml-2">
-                    {skill.percentage}%
-                  </span>
+                  <span className="font-semibold text-gray-400 ml-2">{skill.percentage}%</span>
                 </button>
               );
             })}
@@ -506,9 +477,7 @@ export default function SkillChart({
                 </tr>
               </thead>
               <tbody
-                className={`divide-y ${
-                  theme === "dark" ? "divide-white/5" : "divide-gray-200"
-                }`}
+                className={`divide-y ${theme === "dark" ? "divide-white/5" : "divide-gray-200"}`}
               >
                 {displaySkills.map((skill) => (
                   <tr
@@ -527,9 +496,7 @@ export default function SkillChart({
                       />
                       {skill.name}
                     </td>
-                    <td className="px-4 py-2 text-right">
-                      {skill.repository_count}
-                    </td>
+                    <td className="px-4 py-2 text-right">{skill.repository_count}</td>
                     <td className="px-4 py-2 text-right font-mono font-semibold">
                       {skill.percentage}%
                     </td>

@@ -72,7 +72,7 @@ body:
       options:
         - label: I searched existing issues for duplicates.
           required: true
-  
+
   - type: checkboxes
     id: policy
     attributes:

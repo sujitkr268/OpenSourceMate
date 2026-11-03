@@ -1,7 +1,8 @@
 # "Why This Issue Matches You" Explanation System & Safe Fallbacks
 
-**Issue Reference:** #28  
+**Issue Reference:** #28
 **Components:**
+
 - `backend/app/ai/ai_service.py`
 - `backend/app/api/routes/matching.py`
 - `backend/tests/test_ai_explanations.py`
@@ -11,9 +12,10 @@
 
 ## 1. Overview & Problem Statement
 
-Issue recommendations ranked by compatibility scores give developers numeric confidence, but developers still face friction understanding *why* a particular issue is well-suited for their skills without manually reviewing entire issue descriptions and repo guidelines.
+Issue recommendations ranked by compatibility scores give developers numeric confidence, but developers still face friction understanding _why_ a particular issue is well-suited for their skills without manually reviewing entire issue descriptions and repo guidelines.
 
 This feature delivers grounded, human-readable explanations answering **"Why this issue matches you"**:
+
 - **With LLM Configured (`AI_API_KEY`):** Produces tailored, contextual explanations synthesized strictly from retrieved GitHub data and detected developer skills.
 - **Without LLM Configured (or on API error):** Automatically produces deterministic, high-quality template explanations derived from language matches, repository signals, and issue labels.
 - **Strict Anti-Hallucination Guardrails:** The LLM receives strictly retrieved metadata (title, repo, language, labels, comments).
@@ -62,14 +64,14 @@ graph TD
 
 When no API key is provided, `build_template_explanation(issue, user_skills)` constructs a natural-language summary by analyzing key signals:
 
-| Signal Detected | Template Segment Produced |
-| :--- | :--- |
-| **Language match** | `"directly leverages your experience with {skills}"` |
-| **Title skill match** | Matches keywords like Docker, React, etc. from title words |
-| **"good first issue"** | `"is curated as a beginner-friendly 'good first issue'"` |
-| **"help wanted"** | `"is actively seeking community contributors"` |
-| **Zero comments** | `"has no discussion yet, giving you a fresh opportunity to contribute"` |
-| **Low comments (< 4)** | `"has active discussion ({N} comments) with room to collaborate"` |
+| Signal Detected        | Template Segment Produced                                               |
+| :--------------------- | :---------------------------------------------------------------------- |
+| **Language match**     | `"directly leverages your experience with {skills}"`                    |
+| **Title skill match**  | Matches keywords like Docker, React, etc. from title words              |
+| **"good first issue"** | `"is curated as a beginner-friendly 'good first issue'"`                |
+| **"help wanted"**      | `"is actively seeking community contributors"`                          |
+| **Zero comments**      | `"has no discussion yet, giving you a fresh opportunity to contribute"` |
+| **Low comments (< 4)** | `"has active discussion ({N} comments) with room to collaborate"`       |
 
 ---
 
@@ -84,6 +86,7 @@ When no API key is provided, `build_template_explanation(issue, user_skills)` co
 ## 6. UI Presentation
 
 In `frontend/app/page.tsx`:
+
 - The issue card renders a dedicated callout banner:
   - If `is_ai_generated === true`: Displays `✦ AI Match Grounding` with an `AI Guided` pill badge.
   - If template-generated: Displays `🎯 Why this issue matches you`.

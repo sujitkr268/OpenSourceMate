@@ -45,9 +45,6 @@ This guide explains the labels used on issues in this project and how to choose 
 3. Skip issues labeled `in-progress`, because someone is already on them.
 4. Pick an issue and comment on it to ask to be assigned before you start.
 
-
-
-
-7. Read [CONTRIBUTING.md](../CONTRIBUTING.md) for the full contribution steps.
+5. Read [CONTRIBUTING.md](../CONTRIBUTING.md) for the full contribution steps.
 
 Each issue should normally have one label from each group, for example `beginner` + `docs` + `needs-triage`.

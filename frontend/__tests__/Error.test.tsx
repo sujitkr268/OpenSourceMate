@@ -34,13 +34,12 @@ describe("ErrorBoundary Segment Component", () => {
   it("provides links to return to home and analyzer", () => {
     render(<ErrorBoundary error={mockError} reset={mockReset} />);
 
-    expect(
-      screen.getByRole("link", { name: /Return to Home/i })
-    ).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /Return to Home/i })).toHaveAttribute("href", "/");
 
-    expect(
-      screen.getByRole("link", { name: /Go to Analyzer/i })
-    ).toHaveAttribute("href", "/#analyzer");
+    expect(screen.getByRole("link", { name: /Go to Analyzer/i })).toHaveAttribute(
+      "href",
+      "/#analyzer"
+    );
   });
 
   it("allows toggling technical error details accordion", () => {

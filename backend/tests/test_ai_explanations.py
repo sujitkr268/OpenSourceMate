@@ -1,13 +1,14 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from httpx import AsyncClient, ASGITransport
 
-from app.main import app
+import pytest
+from httpx import ASGITransport, AsyncClient
+
 from app.ai.ai_service import (
     build_template_explanation,
     generate_issue_match_explanation,
     settings,
 )
+from app.main import app
 
 
 @pytest.fixture
@@ -92,7 +93,9 @@ async def test_generate_explanation_with_mocked_llm(sample_issue):
 @pytest.mark.asyncio
 async def test_generate_explanation_falls_back_when_llm_fails(sample_issue):
     mock_client = MagicMock()
-    mock_client.chat.completions.create = AsyncMock(side_effect=RuntimeError("Rate limit reached"))
+    mock_client.chat.completions.create = AsyncMock(
+        side_effect=RuntimeError("Rate limit reached")
+    )
 
     with patch("app.ai.ai_service.client", mock_client):
         result = await generate_issue_match_explanation(sample_issue, ["Python"])
@@ -154,8 +157,16 @@ async def test_matching_route_includes_explanations():
         ],
     }
 
-    with patch("app.api.routes.matching.get_user_repositories", AsyncMock(return_value=mock_repos)), \
-         patch("app.api.routes.matching.search_github_issues", AsyncMock(return_value=mock_search)):
+    with (
+        patch(
+            "app.api.routes.matching.get_user_repositories",
+            AsyncMock(return_value=mock_repos),
+        ),
+        patch(
+            "app.api.routes.matching.search_github_issues",
+            AsyncMock(return_value=mock_search),
+        ),
+    ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             response = await ac.get("/api/matching/users/testuser/issues")

@@ -38,9 +38,7 @@ def make_repo(name, language, fork=False):
 
 
 def patch_user(value):
-    return patch(
-        "app.api.routes.github.get_github_user", AsyncMock(return_value=value)
-    )
+    return patch("app.api.routes.github.get_github_user", AsyncMock(return_value=value))
 
 
 def patch_repos(value):

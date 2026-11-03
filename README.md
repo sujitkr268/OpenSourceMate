@@ -2,7 +2,6 @@
 
 [![CI](https://github.com/Muskankr/OpenSourceMate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Muskankr/OpenSourceMate/actions/workflows/ci.yml)
 
-
 > **Find open-source opportunities that match your skills.**
 
 OpenSourceMate is an AI-powered open-source contribution discovery platform that analyzes a developer's public GitHub profile and technical experience to help identify meaningful contribution opportunities.
@@ -17,20 +16,20 @@ The project is being developed with a focus on making open-source contribution d
 
 Enter a public GitHub username and OpenSourceMate retrieves useful profile information such as:
 
-* GitHub username
-* Name and bio
-* Public repository count
-* Followers and following
-* Link to the GitHub profile
+- GitHub username
+- Name and bio
+- Public repository count
+- Followers and following
+- Link to the GitHub profile
 
 ### 🧠 Technical Skill Analysis
 
 OpenSourceMate analyzes the user's public GitHub repositories to identify technical skills and shows:
 
-* Detected technologies/languages
-* Repository count associated with each skill
-* Skill distribution
-* Number of repositories analyzed
+- Detected technologies/languages
+- Repository count associated with each skill
+- Skill distribution
+- Number of repositories analyzed
 
 ### 🎯 Contribution Discovery — Coming Next
 
@@ -38,12 +37,12 @@ The next stage of OpenSourceMate is focused on connecting a developer's technica
 
 Planned capabilities include:
 
-* Skill-based issue matching
-* Personalized issue recommendations
-* Contribution compatibility analysis
-* Beginner-friendly issue discovery
-* Repository and issue context
-* Contribution opportunity ranking
+- Skill-based issue matching
+- Personalized issue recommendations
+- Contribution compatibility analysis
+- Beginner-friendly issue discovery
+- Repository and issue context
+- Contribution opportunity ranking
 
 > Features marked as planned are part of the project's roadmap and may not be available yet.
 
@@ -70,13 +69,17 @@ OpenSourceMate/
 ```
 
 ## Screenshots
+
 # Dashboard
+
 <img width="1302" height="726" alt="image" src="https://github.com/user-attachments/assets/ba5ac505-b7c3-4c32-a438-afe194e31942" />
 
 # How it works?
+
 <img width="1257" height="723" alt="image" src="https://github.com/user-attachments/assets/908d7b73-7283-4903-83bf-4e0950fa2ee9" />
 
 # Analyze Profile
+
 <img width="1213" height="727" alt="image" src="https://github.com/user-attachments/assets/a115a54f-6359-4db9-83d1-647e28e4167a" />
 
 ---
@@ -85,34 +88,34 @@ OpenSourceMate/
 
 ### Frontend
 
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
 
 ### Backend
 
-* Python
-* FastAPI
-* Uvicorn
-* Pydantic
+- Python
+- FastAPI
+- Uvicorn
+- Pydantic
 
 ### AI / Data
 
 The backend is being developed with an AI/data ecosystem that includes technologies such as:
 
-* Google GenAI
-* OpenAI-compatible tooling
-* Sentence Transformers
-* Transformers
-* spaCy
-* PyTorch
+- Google GenAI
+- OpenAI-compatible tooling
+- Sentence Transformers
+- Transformers
+- spaCy
+- PyTorch
 
 ### Developer & Integration Tools
 
-* GitHub APIs
-* GitPython
-* REST APIs
+- GitHub APIs
+- GitPython
+- REST APIs
 
 ---
 
@@ -122,10 +125,10 @@ The backend is being developed with an AI/data ecosystem that includes technolog
 
 Make sure you have the following installed:
 
-* Git
-* Node.js
-* npm
-* Python 3.x
+- Git
+- Node.js
+- npm
+- Python 3.x
 
 ---
 
@@ -344,25 +347,18 @@ If you are already inside the `backend/` or `frontend/` directory:
 
 ### Supported Environment Variables
 
-| Variable | Location | Required? | Description |
-|---|---|---|---|
-| `ENVIRONMENT` | `backend/.env` | No | Target runtime environment: `development` (default), `production`, or `testing`. Controls security assertions and defaults. |
-| `DEBUG` | `backend/.env` | No | Enables FastAPI debug mode. In development, defaults to `True`. In production, strictly defaults to `False` (setting `True` in production fails loudly). |
-| `SECRET_KEY` | `backend/.env` | Dev: No, Prod: **Yes** | Cryptographic secret key. In development, a default dev key is used. In production, **strictly required** (minimum 16 characters); startup fails loudly if unset or default. |
-| `ALLOWED_HOSTS` | `backend/.env` | No | Comma-separated list of allowed HTTP Host headers for `TrustedHostMiddleware`. Safe default: `*` (permits all hosts). In production, configure exact domain names. |
-| `CORS_ORIGINS` | `backend/.env` | No | Comma-separated list of allowed frontend origins. Default: `http://localhost:3000,http://127.0.0.1:3000,https://open-source-mate-tawny.vercel.app`. |
-| `CORS_ALLOW_CREDENTIALS` | `backend/.env` | No | Boolean indicating whether cross-origin cookies and authorization headers are supported. Safe default: `False`. |
-| `CORS_ALLOW_METHODS` | `backend/.env` | No | Comma-separated list of permitted HTTP methods. Default: `*`. |
-| `CORS_ALLOW_HEADERS` | `backend/.env` | No | Comma-separated list of permitted HTTP headers. Default: `*`. |
-| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | No | Base URL of the FastAPI backend server accessed by the Next.js frontend. Safe default: `http://localhost:8000`. No credentials needed. |
-| `GITHUB_TOKEN` | `backend/.env` | No | GitHub Personal Access Token (classic or fine-grained). Raises GitHub REST API rate limits from 60 to 5,000 requests/hour. Safe default: empty (unauthenticated requests). To obtain one, navigate to GitHub **Settings > Developer Settings > Personal access tokens** and generate a token (public read-only access is sufficient). |
-| `GITHUB_CACHE_TTL` | `backend/.env` | No | In-memory cache duration (in seconds) for GitHub profile and repository API responses. Safe default: `300` (5 minutes). Set to `0` to disable in-memory caching during development. No credentials needed. |
-| `AI_API_KEY` | `backend/.env` | No | OpenAI API key used for optional AI-powered issue analysis (`/api/ai/analyze-issue`). Safe default: empty (AI analysis endpoints return graceful fallback recommendations without errors). To obtain one, generate an API key at [platform.openai.com](https://platform.openai.com/). |
-| `AI_MODEL` | `backend/.env` | No | Model name passed to OpenAI when `AI_API_KEY` is set. Safe default: `gpt-4o-mini`. No credentials needed. |
+| Variable              | Location              | Required? | Description                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | No        | Base URL of the FastAPI backend server accessed by the Next.js frontend. Safe default: `http://localhost:8000`. No credentials needed.                                                                                                                                                                                                |
+| `GITHUB_TOKEN`        | `backend/.env`        | No        | GitHub Personal Access Token (classic or fine-grained). Raises GitHub REST API rate limits from 60 to 5,000 requests/hour. Safe default: empty (unauthenticated requests). To obtain one, navigate to GitHub **Settings > Developer Settings > Personal access tokens** and generate a token (public read-only access is sufficient). |
+| `GITHUB_CACHE_TTL`    | `backend/.env`        | No        | In-memory cache duration (in seconds) for GitHub profile and repository API responses. Safe default: `300` (5 minutes). Set to `0` to disable in-memory caching during development. No credentials needed.                                                                                                                            |
+| `AI_API_KEY`          | `backend/.env`        | No        | OpenAI API key used for optional AI-powered issue analysis (`/api/ai/analyze-issue`). Safe default: empty (AI analysis endpoints return graceful fallback recommendations without errors). To obtain one, generate an API key at [platform.openai.com](https://platform.openai.com/).                                                 |
+| `AI_MODEL`            | `backend/.env`        | No        | Model name passed to OpenAI when `AI_API_KEY` is set. Safe default: `gpt-4o-mini`. No credentials needed.                                                                                                                                                                                                                             |
 
-> **Dev vs. Production Separation:**
-> - In **development** (`ENVIRONMENT=development`), `DEBUG` defaults to `True` and an insecure default `SECRET_KEY` is allowed so developers can run `uvicorn app.main:app --reload` immediately without configuration.
-> - In **production** (`ENVIRONMENT=production`), the application enforces strict production invariants: `DEBUG` must be `False`, and `SECRET_KEY` must be a high-entropy string of at least 16 characters. If `SECRET_KEY` is unset, empty, or using the default key, the application **fails loudly on startup** with a descriptive `ValueError`.
+> **Framework Notes:**
+>
+> - The backend is implemented in **FastAPI** using Pydantic Settings. It does not use Django, so Django-specific settings (`SECRET_KEY`, `DEBUG`) are not required or supported.
+> - The AI integration uses OpenAI via `AI_API_KEY` and `AI_MODEL` in the backend; other variables like `OPENAI_API_KEY` or `GOOGLE_API_KEY` are not read by the current codebase.
 > - Never expose server-side credentials or API keys in the frontend (`NEXT_PUBLIC_*`). Only public configuration (such as the backend API URL) should be placed in `frontend/.env.local`.
 
 **Never commit API keys, passwords, tokens, or other secrets to Git.**
@@ -418,7 +414,7 @@ Personalized Opportunities
 
 ## 🤝 Contributing
 
-* See the [Label Guide](docs/LABELS.md) to find an issue that fits your skills.
+- See the [Label Guide](docs/LABELS.md) to find an issue that fits your skills.
 
 OpenSourceMate is being built as an open-source project, and contributions are welcome.
 
@@ -448,10 +444,10 @@ git push origin feature/your-feature
 
 Then open a pull request describing:
 
-* What you changed
-* Why you changed it
-* How you tested it
-* Any relevant screenshots or examples
+- What you changed
+- Why you changed it
+- How you tested it
+- Any relevant screenshots or examples
 
 For detailed guidelines on setup, branch naming, PR conventions, and coding standards, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -463,12 +459,12 @@ Found a bug or have an idea?
 
 Open an issue and include:
 
-* A clear title
-* Description of the problem or feature
-* Steps to reproduce, when applicable
-* Expected behavior
-* Actual behavior
-* Screenshots or logs when useful
+- A clear title
+- Description of the problem or feature
+- Steps to reproduce, when applicable
+- Expected behavior
+- Actual behavior
+- Screenshots or logs when useful
 
 For larger changes, discuss the idea before starting implementation.
 
@@ -482,11 +478,11 @@ A dedicated security reporting process will be documented as the project matures
 
 Never include:
 
-* API keys
-* Access tokens
-* Passwords
-* Personal credentials
-* Private repository information
+- API keys
+- Access tokens
+- Passwords
+- Personal credentials
+- Private repository information
 
 in issues or pull requests.
 
@@ -496,13 +492,33 @@ in issues or pull requests.
 
 Open-source contribution can be difficult to navigate, especially for developers who are unsure:
 
-* Which projects match their skills?
-* Which issues are suitable for their experience?
-* How difficult is an issue?
-* What does a repository actually need?
-* Where should they start?
+- Which projects match their skills?
+- Which issues are suitable for their experience?
+- How difficult is an issue?
+- What does a repository actually need?
+- Where should they start?
 
 OpenSourceMate aims to reduce that discovery barrier by connecting a developer's existing technical experience with meaningful open-source contribution opportunities.
+
+---
+
+## 🧹 Code Quality, Linting & Pre-Commit
+
+OpenSourceMate uses automated code quality tools to maintain clean and reliable code:
+
+- **Pre-Commit**: Automated Git pre-commit hooks configured via `.pre-commit-config.yaml`.
+  ```bash
+  # Install pre-commit hook into your local git repository
+  cd backend && pip install -r requirements-dev.txt
+  pre-commit install
+
+  # Run pre-commit checks manually on all files
+  pre-commit run --all-files
+  ```
+- **Backend (Python)**: [Ruff](https://docs.astral.sh/ruff/) for linting and formatting (`ruff check backend`, `ruff format backend`).
+- **Frontend (TypeScript/Next.js)**: [Prettier](https://prettier.io/) and [ESLint](https://eslint.org/) (`npm run format:check`, `npm run lint`, `npx tsc --noEmit`).
+
+See the [Linting and Formatting Guide](docs/linting-and-formatting.md) for full instructions.
 
 ---
 
@@ -535,11 +551,11 @@ See the `LICENSE` file for details.
 
 If you find OpenSourceMate useful or are interested in its development:
 
-* ⭐ Star the repository
-* 🐛 Report bugs
-* 💡 Suggest features
-* 🔧 Submit pull requests
-* 📖 Improve documentation
+- ⭐ Star the repository
+- 🐛 Report bugs
+- 💡 Suggest features
+- 🔧 Submit pull requests
+- 📖 Improve documentation
 
 Every contribution helps make open-source participation easier for developers.
 

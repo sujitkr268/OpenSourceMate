@@ -2,13 +2,12 @@ import base64
 import json
 import re
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
 from app.cache import TTLCache
 from app.config import get_settings
-
 
 GITHUB_API_URL = "https://api.github.com"
 
@@ -52,15 +51,13 @@ def _rate_limit_reset(response: httpx.Response) -> datetime | None:
     reset = response.headers.get("X-RateLimit-Reset")
 
     if reset and reset.isdigit():
-        return datetime.fromtimestamp(int(reset), tz=timezone.utc)
+        return datetime.fromtimestamp(int(reset), tz=UTC)
 
     # Secondary rate limits only send Retry-After (in seconds).
     retry_after = response.headers.get("Retry-After")
 
     if retry_after and retry_after.isdigit():
-        return datetime.fromtimestamp(
-            time.time() + int(retry_after), tz=timezone.utc
-        )
+        return datetime.fromtimestamp(time.time() + int(retry_after), tz=UTC)
 
     return None
 
@@ -330,6 +327,7 @@ async def get_repository_details(
 
     return details
 
+
 async def get_github_diagnostics() -> dict:
     """Check GitHub API reachability, auth token presence, and quota status."""
     settings = get_settings()
@@ -356,7 +354,7 @@ async def get_github_diagnostics() -> dict:
             def _format_reset(ts: int | None) -> str | None:
                 if not ts:
                     return None
-                return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+                return datetime.fromtimestamp(ts, tz=UTC).isoformat()
 
             return {
                 "reachable": True,

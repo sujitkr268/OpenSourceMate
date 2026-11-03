@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.services.matching_service import (
     calculate_issue_score,
@@ -12,7 +12,7 @@ class TestMatchingService(unittest.TestCase):
         issue = {
             "language": "Python",
             "labels": [],
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "comments": 2,
         }
 
@@ -25,7 +25,7 @@ class TestMatchingService(unittest.TestCase):
         issue = {
             "language": None,
             "labels": ["good first issue", "help wanted"],
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "comments": 1,
         }
 
@@ -37,8 +37,7 @@ class TestMatchingService(unittest.TestCase):
         )
         self.assertTrue(
             any(
-                "help wanted" in reason.lower()
-                or "looking for contributors" in reason
+                "help wanted" in reason.lower() or "looking for contributors" in reason
                 for reason in result["reasons"]
             )
         )
@@ -47,9 +46,9 @@ class TestMatchingService(unittest.TestCase):
         issue = {
             "language": None,
             "labels": [],
-            "updated_at": (
-                datetime.now(timezone.utc) - timedelta(days=5)
-            ).isoformat().replace("+00:00", "Z"),
+            "updated_at": (datetime.now(UTC) - timedelta(days=5))
+            .isoformat()
+            .replace("+00:00", "Z"),
             "comments": 20,
         }
 
@@ -64,7 +63,7 @@ class TestMatchingService(unittest.TestCase):
         issue = {
             "language": "Python",
             "labels": ["good first issue", "help wanted"],
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "comments": 0,
         }
 
@@ -76,9 +75,9 @@ class TestMatchingService(unittest.TestCase):
         issue = {
             "language": None,
             "labels": [],
-            "updated_at": (
-                datetime.now(timezone.utc) - timedelta(days=200)
-            ).isoformat().replace("+00:00", "Z"),
+            "updated_at": (datetime.now(UTC) - timedelta(days=200))
+            .isoformat()
+            .replace("+00:00", "Z"),
             "comments": 3,
         }
 
@@ -86,14 +85,11 @@ class TestMatchingService(unittest.TestCase):
 
         self.assertEqual(result["score"], 10)
         self.assertTrue(
-            any(
-                "manageable discussion" in reason
-                for reason in result["reasons"]
-            )
+            any("manageable discussion" in reason for reason in result["reasons"])
         )
 
     def test_freshness_active_within_14_days(self):
-        now = datetime(2026, 10, 25, 12, 0, 0, tzinfo=timezone.utc)
+        now = datetime(2026, 10, 25, 12, 0, 0, tzinfo=UTC)
         recent_date = (now - timedelta(days=3)).isoformat()
 
         freshness = categorize_issue_freshness(recent_date, now=now)
@@ -103,7 +99,7 @@ class TestMatchingService(unittest.TestCase):
         self.assertEqual(freshness["label"], "Updated 3d ago")
 
     def test_freshness_recent_between_15_and_60_days(self):
-        now = datetime(2026, 10, 25, 12, 0, 0, tzinfo=timezone.utc)
+        now = datetime(2026, 10, 25, 12, 0, 0, tzinfo=UTC)
         date_30d = (now - timedelta(days=30)).isoformat()
 
         freshness = categorize_issue_freshness(date_30d, now=now)
@@ -112,7 +108,7 @@ class TestMatchingService(unittest.TestCase):
         self.assertEqual(freshness["days_ago"], 30)
 
     def test_freshness_stale_over_60_days(self):
-        now = datetime(2026, 10, 25, 12, 0, 0, tzinfo=timezone.utc)
+        now = datetime(2026, 10, 25, 12, 0, 0, tzinfo=UTC)
         date_100d = (now - timedelta(days=100)).isoformat()
 
         freshness = categorize_issue_freshness(date_100d, now=now)
@@ -133,7 +129,7 @@ class TestMatchingService(unittest.TestCase):
         issue = {
             "language": "Python",
             "labels": ["good first issue"],
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "comments": 2,
         }
 
@@ -157,7 +153,7 @@ def _issue(title, body="", language="Python", **extra):
         "labels": ["good first issue"],
         "language": language,
         "comments": 1,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat(),
     }
     base.update(extra)
     return base
@@ -170,7 +166,9 @@ class TestTextMatching(unittest.TestCase):
     ]
 
     def test_issue_mentioning_a_skill_ranks_above_an_unrelated_one(self):
-        related = _issue("Add FastAPI dependency for auth", "Use Depends in the FastAPI router")
+        related = _issue(
+            "Add FastAPI dependency for auth", "Use Depends in the FastAPI router"
+        )
         unrelated = _issue("Fix typo in docs")
         idf = build_idf([related, unrelated], self.skills)
 
@@ -218,7 +216,11 @@ class TestTextMatching(unittest.TestCase):
         self.assertIn("python", result["matched_skills"])
 
     def test_score_stays_capped_at_100_but_raw_score_keeps_order(self):
-        strong = _issue("Python FastAPI Python FastAPI", "Python FastAPI " * 20, labels=["good first issue", "help wanted"])
+        strong = _issue(
+            "Python FastAPI Python FastAPI",
+            "Python FastAPI " * 20,
+            labels=["good first issue", "help wanted"],
+        )
 
         result = calculate_issue_score(strong, self.skills)
 

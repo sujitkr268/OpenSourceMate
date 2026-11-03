@@ -1,452 +1,392 @@
 {
- "note": "Hand-labelled examples written for this evaluation (not scraped from GitHub). relevance: 2 = fits the profile, 1 = generic or mildly relevant, 0 = unrelated.",
- "profiles": [
-  {
-   "name": "python-fastapi",
-   "skills": [
+  "note": "Hand-labelled examples written for this evaluation (not scraped from GitHub). relevance: 2 = fits the profile, 1 = generic or mildly relevant, 0 = unrelated.",
+  "profiles": [
     {
-     "name": "Python",
-     "weight": 1.0
+      "name": "python-fastapi",
+      "skills": [
+        {
+          "name": "Python",
+          "weight": 1.0
+        },
+        {
+          "name": "FastAPI",
+          "weight": 0.6
+        },
+        {
+          "name": "Docker",
+          "weight": 0.3
+        }
+      ],
+      "issues": [
+        {
+          "id": 101,
+          "title": "Add pagination to the /items endpoint",
+          "body": "The FastAPI router returns every row. Add limit and offset query params with Pydantic validation.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/fastapi-shop",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 102,
+          "title": "Dockerfile builds as root",
+          "body": "Use a non-root user in the Dockerfile for the Python API image.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/api-service",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 103,
+          "title": "Typo in README install section",
+          "body": "The pip command has a typo.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/api-service",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 1
+        },
+        {
+          "id": 104,
+          "title": "Add dark mode toggle",
+          "body": "Add a theme switch to the React settings page.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/web-dashboard",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 105,
+          "title": "Write unit tests for the auth dependency",
+          "body": "Cover the FastAPI Depends function that validates JWT tokens with pytest.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/fastapi-shop",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 106,
+          "title": "Update CI to Node 20",
+          "body": "The GitHub Action still uses Node 16 for the frontend build.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/web-dashboard",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 107,
+          "title": "Handle empty request body in parser",
+          "body": "The Python parser raises KeyError when the body is empty.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/parser",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 108,
+          "title": "Translate docs to Spanish",
+          "body": "Help translate the user guide.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/docs",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 109,
+          "title": "Rename a variable for clarity",
+          "body": "Rename tmp to result in utils.py.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/utils",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 1
+        },
+        {
+          "id": 110,
+          "title": "Add a Rust benchmark for the tokenizer",
+          "body": "Write criterion benchmarks for the tokenizer crate.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/tokenizer",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        }
+      ]
     },
     {
-     "name": "FastAPI",
-     "weight": 0.6
+      "name": "react-typescript",
+      "skills": [
+        {
+          "name": "TypeScript",
+          "weight": 1.0
+        },
+        {
+          "name": "React",
+          "weight": 0.9
+        },
+        {
+          "name": "Tailwind CSS",
+          "weight": 0.4
+        }
+      ],
+      "issues": [
+        {
+          "id": 201,
+          "title": "Button loses focus ring in the React navbar",
+          "body": "The Tailwind focus classes are overridden. Restore the focus-visible ring on the nav buttons.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/web-ui",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 202,
+          "title": "Type the useFetch hook",
+          "body": "The React hook returns any. Add generics in TypeScript.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/web-ui",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 203,
+          "title": "Fix flaky Django migration test",
+          "body": "The migration test depends on ordering.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/backend",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 204,
+          "title": "Add loading skeleton to the dashboard",
+          "body": "Show a skeleton while the React Query data loads.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/dashboard",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 205,
+          "title": "Typo in CONTRIBUTING",
+          "body": "Fix spelling in the contributing guide.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/dashboard",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 1
+        },
+        {
+          "id": 206,
+          "title": "Add Kubernetes manifests",
+          "body": "Provide helm charts for the deployment.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/infra",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 207,
+          "title": "Migrate class components to hooks",
+          "body": "Convert the remaining React class components to function components with TypeScript props.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/legacy-ui",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 208,
+          "title": "Improve README badges",
+          "body": "Add build status badges.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/web-ui",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 1
+        },
+        {
+          "id": 209,
+          "title": "Add a Go linter config",
+          "body": "Add golangci-lint to the CI.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/tools",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 210,
+          "title": "Make the Tailwind config share colors",
+          "body": "Move repeated hex colors into the Tailwind theme.",
+          "language": "TypeScript",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/web-ui",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        }
+      ]
     },
     {
-     "name": "Docker",
-     "weight": 0.3
+      "name": "data-ml",
+      "skills": [
+        {
+          "name": "Python",
+          "weight": 1.0
+        },
+        {
+          "name": "PyTorch",
+          "weight": 0.7
+        },
+        {
+          "name": "pandas",
+          "weight": 0.5
+        }
+      ],
+      "issues": [
+        {
+          "id": 301,
+          "title": "Add a learning-rate scheduler option",
+          "body": "Expose a cosine schedule in the PyTorch training loop config.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/trainer",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 302,
+          "title": "pandas read_csv warns about mixed types",
+          "body": "Set dtype explicitly when the pandas loader reads the dataset.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/data-tools",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 303,
+          "title": "Typo in docstring",
+          "body": "Fix a typo in utils.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/data-tools",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 1
+        },
+        {
+          "id": 304,
+          "title": "Add React chart component",
+          "body": "Build a bar chart in the web UI.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/web",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 305,
+          "title": "Seed all random generators",
+          "body": "Seed numpy and PyTorch so experiments are reproducible.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/trainer",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 306,
+          "title": "Update the Docker base image",
+          "body": "Bump the base image tag.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/trainer",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 1
+        },
+        {
+          "id": 307,
+          "title": "Add Swift package support",
+          "body": "Add Package.swift for iOS users.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/sdk",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        },
+        {
+          "id": 308,
+          "title": "Handle NaN rows in the preprocessing step",
+          "body": "pandas drops rows silently. Log and count the dropped NaN rows.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/data-tools",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 2
+        },
+        {
+          "id": 309,
+          "title": "Rename config keys",
+          "body": "Make config keys consistent.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/trainer",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 1
+        },
+        {
+          "id": 310,
+          "title": "Add Java sample",
+          "body": "Add a Java client example.",
+          "language": "Python",
+          "labels": ["good first issue"],
+          "comments": 1,
+          "repository": "acme/sdk",
+          "updated_at": "2026-10-20T00:00:00Z",
+          "relevance": 0
+        }
+      ]
     }
-   ],
-   "issues": [
-    {
-     "id": 101,
-     "title": "Add pagination to the /items endpoint",
-     "body": "The FastAPI router returns every row. Add limit and offset query params with Pydantic validation.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/fastapi-shop",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 102,
-     "title": "Dockerfile builds as root",
-     "body": "Use a non-root user in the Dockerfile for the Python API image.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/api-service",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 103,
-     "title": "Typo in README install section",
-     "body": "The pip command has a typo.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/api-service",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 1
-    },
-    {
-     "id": 104,
-     "title": "Add dark mode toggle",
-     "body": "Add a theme switch to the React settings page.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/web-dashboard",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 105,
-     "title": "Write unit tests for the auth dependency",
-     "body": "Cover the FastAPI Depends function that validates JWT tokens with pytest.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/fastapi-shop",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 106,
-     "title": "Update CI to Node 20",
-     "body": "The GitHub Action still uses Node 16 for the frontend build.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/web-dashboard",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 107,
-     "title": "Handle empty request body in parser",
-     "body": "The Python parser raises KeyError when the body is empty.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/parser",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 108,
-     "title": "Translate docs to Spanish",
-     "body": "Help translate the user guide.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/docs",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 109,
-     "title": "Rename a variable for clarity",
-     "body": "Rename tmp to result in utils.py.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/utils",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 1
-    },
-    {
-     "id": 110,
-     "title": "Add a Rust benchmark for the tokenizer",
-     "body": "Write criterion benchmarks for the tokenizer crate.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/tokenizer",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    }
-   ]
-  },
-  {
-   "name": "react-typescript",
-   "skills": [
-    {
-     "name": "TypeScript",
-     "weight": 1.0
-    },
-    {
-     "name": "React",
-     "weight": 0.9
-    },
-    {
-     "name": "Tailwind CSS",
-     "weight": 0.4
-    }
-   ],
-   "issues": [
-    {
-     "id": 201,
-     "title": "Button loses focus ring in the React navbar",
-     "body": "The Tailwind focus classes are overridden. Restore the focus-visible ring on the nav buttons.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/web-ui",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 202,
-     "title": "Type the useFetch hook",
-     "body": "The React hook returns any. Add generics in TypeScript.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/web-ui",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 203,
-     "title": "Fix flaky Django migration test",
-     "body": "The migration test depends on ordering.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/backend",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 204,
-     "title": "Add loading skeleton to the dashboard",
-     "body": "Show a skeleton while the React Query data loads.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/dashboard",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 205,
-     "title": "Typo in CONTRIBUTING",
-     "body": "Fix spelling in the contributing guide.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/dashboard",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 1
-    },
-    {
-     "id": 206,
-     "title": "Add Kubernetes manifests",
-     "body": "Provide helm charts for the deployment.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/infra",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 207,
-     "title": "Migrate class components to hooks",
-     "body": "Convert the remaining React class components to function components with TypeScript props.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/legacy-ui",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 208,
-     "title": "Improve README badges",
-     "body": "Add build status badges.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/web-ui",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 1
-    },
-    {
-     "id": 209,
-     "title": "Add a Go linter config",
-     "body": "Add golangci-lint to the CI.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/tools",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 210,
-     "title": "Make the Tailwind config share colors",
-     "body": "Move repeated hex colors into the Tailwind theme.",
-     "language": "TypeScript",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/web-ui",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    }
-   ]
-  },
-  {
-   "name": "data-ml",
-   "skills": [
-    {
-     "name": "Python",
-     "weight": 1.0
-    },
-    {
-     "name": "PyTorch",
-     "weight": 0.7
-    },
-    {
-     "name": "pandas",
-     "weight": 0.5
-    }
-   ],
-   "issues": [
-    {
-     "id": 301,
-     "title": "Add a learning-rate scheduler option",
-     "body": "Expose a cosine schedule in the PyTorch training loop config.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/trainer",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 302,
-     "title": "pandas read_csv warns about mixed types",
-     "body": "Set dtype explicitly when the pandas loader reads the dataset.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/data-tools",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 303,
-     "title": "Typo in docstring",
-     "body": "Fix a typo in utils.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/data-tools",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 1
-    },
-    {
-     "id": 304,
-     "title": "Add React chart component",
-     "body": "Build a bar chart in the web UI.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/web",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 305,
-     "title": "Seed all random generators",
-     "body": "Seed numpy and PyTorch so experiments are reproducible.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/trainer",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 306,
-     "title": "Update the Docker base image",
-     "body": "Bump the base image tag.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/trainer",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 1
-    },
-    {
-     "id": 307,
-     "title": "Add Swift package support",
-     "body": "Add Package.swift for iOS users.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/sdk",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    },
-    {
-     "id": 308,
-     "title": "Handle NaN rows in the preprocessing step",
-     "body": "pandas drops rows silently. Log and count the dropped NaN rows.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/data-tools",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 2
-    },
-    {
-     "id": 309,
-     "title": "Rename config keys",
-     "body": "Make config keys consistent.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/trainer",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 1
-    },
-    {
-     "id": 310,
-     "title": "Add Java sample",
-     "body": "Add a Java client example.",
-     "language": "Python",
-     "labels": [
-      "good first issue"
-     ],
-     "comments": 1,
-     "repository": "acme/sdk",
-     "updated_at": "2026-10-20T00:00:00Z",
-     "relevance": 0
-    }
-   ]
-  }
- ]
+  ]
 }

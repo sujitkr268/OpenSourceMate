@@ -88,7 +88,8 @@ export function validateGitHubUsername(rawInput: string): ValidationResult {
     return {
       isValid: false,
       cleanUsername,
-      error: "GitHub username can only contain alphanumeric characters (letters and numbers) and single hyphens.",
+      error:
+        "GitHub username can only contain alphanumeric characters (letters and numbers) and single hyphens.",
       errorCode: "INVALID_CHARACTERS",
     };
   }

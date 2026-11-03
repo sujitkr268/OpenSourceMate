@@ -1,6 +1,5 @@
 from app.services.github_service import GITHUB_API_URL, github_get
 
-
 MAX_BODY_LENGTH = 1000
 
 
@@ -46,15 +45,10 @@ async def search_github_issues(
             {
                 "id": issue["id"],
                 "title": issue["title"],
-                "repository": issue["repository_url"].split(
-                    "/repos/"
-                )[-1],
+                "repository": issue["repository_url"].split("/repos/")[-1],
                 "url": issue["html_url"],
                 "state": issue["state"],
-                "labels": [
-                    label["name"]
-                    for label in issue["labels"]
-                ],
+                "labels": [label["name"] for label in issue["labels"]],
                 "comments": issue["comments"],
                 "created_at": issue["created_at"],
                 "updated_at": issue["updated_at"],

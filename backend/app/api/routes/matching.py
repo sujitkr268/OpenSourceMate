@@ -1,16 +1,15 @@
 from fastapi import APIRouter, HTTPException, Query
 
+from app.ai.ai_service import generate_issue_match_explanation
+from app.services.embedding_service import similarities
 from app.services.github_service import (
     GitHubRateLimitError,
     get_user_repositories,
 )
-from app.services.skill_service import analyze_skills
 from app.services.issue_service import search_github_issues
-from app.services.embedding_service import similarities
 from app.services.matching_service import build_idf, calculate_issue_score
-from app.ai.ai_service import generate_issue_match_explanation
+from app.services.skill_service import analyze_skills
 from app.utils.validation import validate_github_username
-
 
 router = APIRouter(
     prefix="/api/matching",
@@ -34,10 +33,7 @@ async def get_matched_issues(
 
     skill_data = analyze_skills(repositories)
 
-    user_skills = [
-        skill["name"]
-        for skill in skill_data["skills"]
-    ]
+    user_skills = [skill["name"] for skill in skill_data["skills"]]
 
     # Relative weight of each skill, so a main language counts for more than a side one.
     max_count = max(
@@ -124,7 +120,8 @@ async def get_matched_issues(
     # Optionally exclude stale issues (>60 days inactive)
     if exclude_stale:
         recommendations = [
-            iss for iss in recommendations
+            iss
+            for iss in recommendations
             if not (iss.get("freshness") and iss["freshness"].get("is_stale"))
         ]
 

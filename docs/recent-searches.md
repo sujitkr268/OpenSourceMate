@@ -1,7 +1,8 @@
 # Recent Profile Searches via LocalStorage Specification
 
-**Issue Reference:** #33  
+**Issue Reference:** #33
 **Components:**
+
 - `frontend/utils/recentSearches.ts`
 - `frontend/components/RecentSearches.tsx`
 - `frontend/__tests__/recentSearches.test.ts`
@@ -15,6 +16,7 @@
 Developers frequently revisit the same profiles or compare colleagues' profiles. Without persistence, users are forced to manually re-type usernames every time they load or refresh the page.
 
 This feature adds automatic, client-side recent search tracking:
+
 1. **Deduplicated History:** Stores up to 5 unique, successfully analyzed GitHub usernames.
 2. **Instant Re-Analysis:** Clicking a search chip immediately loads that username and initiates profile analysis.
 3. **Individual and Bulk Deletion:** Users can dismiss individual chips with a close button or clear all stored items at once.
@@ -29,6 +31,7 @@ This feature adds automatic, client-side recent search tracking:
 - **Capacity:** Fixed limit of 5 (`MAX_RECENT_SEARCHES = 5`)
 
 ### Operations:
+
 ```typescript
 getRecentSearches(): string[]
 saveRecentSearch(username: string): string[]

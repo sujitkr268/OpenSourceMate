@@ -29,8 +29,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is it free?",
-    answer:
-      "Yes. OpenSourceMate is free to use and open source under the MIT License.",
+    answer: "Yes. OpenSourceMate is free to use and open source under the MIT License.",
   },
 ];
 
@@ -39,10 +38,7 @@ export default function FAQ({ theme }: { theme: "dark" | "light" }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const handleKeyDown = (
-    event: KeyboardEvent<HTMLButtonElement>,
-    index: number
-  ) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const last = FAQ_ITEMS.length - 1;
     let next: number | null = null;
 

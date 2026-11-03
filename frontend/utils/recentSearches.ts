@@ -48,15 +48,10 @@ export function saveRecentSearch(rawUsername: string): string[] {
     const existing = getRecentSearches();
 
     // Deduplicate case-insensitively while preserving latest casing
-    const filtered = existing.filter(
-      (item) => item.toLowerCase() !== clean.toLowerCase()
-    );
+    const filtered = existing.filter((item) => item.toLowerCase() !== clean.toLowerCase());
 
     const updated = [clean, ...filtered].slice(0, MAX_RECENT_SEARCHES);
-    window.localStorage.setItem(
-      RECENT_SEARCHES_STORAGE_KEY,
-      JSON.stringify(updated)
-    );
+    window.localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(updated));
     return updated;
   } catch {
     // If localStorage quota is exceeded or storage is blocked, return in-memory state
@@ -78,10 +73,7 @@ export function removeRecentSearch(usernameToRemove: string): string[] {
       (item) => item.toLowerCase() !== usernameToRemove.toLowerCase().trim()
     );
 
-    window.localStorage.setItem(
-      RECENT_SEARCHES_STORAGE_KEY,
-      JSON.stringify(updated)
-    );
+    window.localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(updated));
     return updated;
   } catch {
     return [];

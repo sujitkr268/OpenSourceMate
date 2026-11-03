@@ -2,3 +2,8 @@
 .env
 .env.*
 !.env.example
+
+# Dependencies & build caches
+node_modules/
+.ruff_cache/
+.pytest_cache/

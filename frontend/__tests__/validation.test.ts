@@ -127,9 +127,7 @@ describe("Validation Utilities - resolveAnalyzerErrorMessage", () => {
 
   it("resolves 429 rate limit fallback message when timestamp missing", () => {
     const msg = resolveAnalyzerErrorMessage(429);
-    expect(msg).toBe(
-      "GitHub API rate limit reached. Please try again in a few minutes."
-    );
+    expect(msg).toBe("GitHub API rate limit reached. Please try again in a few minutes.");
   });
 
   it("resolves 502 and 503 gateway / service unavailable", () => {
@@ -144,9 +142,7 @@ describe("Validation Utilities - resolveAnalyzerErrorMessage", () => {
   it("resolves TypeError as network connection failure", () => {
     const typeError = new TypeError("Failed to fetch");
     const msg = resolveAnalyzerErrorMessage(typeError);
-    expect(msg).toMatch(
-      /Unable to connect to the server\. Please check your network connection/i
-    );
+    expect(msg).toMatch(/Unable to connect to the server\. Please check your network connection/i);
   });
 
   it("resolves standard Error instances", () => {

@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.services import embedding_service
 from app.services.matching_service import calculate_issue_score
@@ -13,7 +13,9 @@ class FakeModel:
         vectors = []
         for text in texts:
             lowered = text.lower()
-            vectors.append([1.0 if "python" in lowered else 0.0, 1.0 if "rust" in lowered else 0.0])
+            vectors.append(
+                [1.0 if "python" in lowered else 0.0, 1.0 if "rust" in lowered else 0.0]
+            )
         return vectors
 
 
@@ -24,7 +26,7 @@ def _issue(title):
         "labels": [],
         "language": None,
         "comments": 1,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -52,7 +54,9 @@ class TestEmbeddingService(unittest.TestCase):
         self.assertEqual(scores, [1.0, 0.0, 0.0])
 
     def test_no_issues_gives_empty_list(self):
-        self.assertEqual(embedding_service.similarities(["Python"], [], model=FakeModel()), [])
+        self.assertEqual(
+            embedding_service.similarities(["Python"], [], model=FakeModel()), []
+        )
 
     def test_embedding_similarity_adds_points_and_changes_the_method(self):
         issue = _issue("Unrelated wording")

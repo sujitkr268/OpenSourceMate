@@ -1,15 +1,15 @@
 import json
 import re
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 from openai import AsyncOpenAI
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class AISettings(BaseSettings):
-    ai_api_key: Optional[str] = None
-    ai_model: Optional[str] = "gpt-4o-mini"
-    gemini_api_key: Optional[str] = None
+    ai_api_key: str | None = None
+    ai_model: str | None = "gpt-4o-mini"
+    gemini_api_key: str | None = None
     osm_max_explanation_words: int = 50
 
     model_config = SettingsConfigDict(
@@ -22,7 +22,7 @@ class AISettings(BaseSettings):
 settings = AISettings()
 
 # Safe client initialization without logging sensitive credentials
-client: Optional[AsyncOpenAI] = None
+client: AsyncOpenAI | None = None
 if settings.ai_api_key:
     # Ensure api_key is non-empty after stripping
     clean_key = settings.ai_api_key.strip()
@@ -30,7 +30,7 @@ if settings.ai_api_key:
         client = AsyncOpenAI(api_key=clean_key)
 
 
-def build_template_explanation(issue: Dict[str, Any], user_skills: List[str]) -> str:
+def build_template_explanation(issue: dict[str, Any], user_skills: list[str]) -> str:
     """
     Generate a deterministic, grounded explanation for why an issue matches
     a developer's profile using only retrieved metadata. Zero hallucination guarantee.
@@ -42,7 +42,7 @@ def build_template_explanation(issue: Dict[str, Any], user_skills: List[str]) ->
     comments = issue.get("comments", 0)
 
     # Detect skills that match the issue's language or title
-    matched_skills: List[str] = []
+    matched_skills: list[str] = []
     normalized_skills = {s.lower(): s for s in user_skills}
 
     if lang and lang.lower() in normalized_skills:
@@ -53,11 +53,13 @@ def build_template_explanation(issue: Dict[str, Any], user_skills: List[str]) ->
         if s_lower in title_words and s_orig not in matched_skills:
             matched_skills.append(s_orig)
 
-    is_good_first = any("good first issue" in lbl or "good-first-issue" in lbl for lbl in labels)
+    is_good_first = any(
+        "good first issue" in lbl or "good-first-issue" in lbl for lbl in labels
+    )
     is_help_wanted = any("help wanted" in lbl or "help-wanted" in lbl for lbl in labels)
     is_docs = any("doc" in lbl for lbl in labels)
 
-    reasons: List[str] = []
+    reasons: list[str] = []
 
     if matched_skills:
         skills_str = ", ".join(matched_skills[:2])
@@ -73,9 +75,13 @@ def build_template_explanation(issue: Dict[str, Any], user_skills: List[str]) ->
         reasons.append("focuses on documentation improvements")
 
     if comments == 0:
-        reasons.append("has no discussion yet, giving you a fresh opportunity to contribute")
+        reasons.append(
+            "has no discussion yet, giving you a fresh opportunity to contribute"
+        )
     elif comments < 4:
-        reasons.append(f"has active discussion ({comments} comments) with room to collaborate")
+        reasons.append(
+            f"has active discussion ({comments} comments) with room to collaborate"
+        )
 
     if reasons:
         explanation = f"This issue in {repo} " + ", and ".join(reasons) + "."
@@ -86,9 +92,9 @@ def build_template_explanation(issue: Dict[str, Any], user_skills: List[str]) ->
 
 
 async def generate_issue_match_explanation(
-    issue: Dict[str, Any],
-    user_skills: List[str],
-) -> Dict[str, Any]:
+    issue: dict[str, Any],
+    user_skills: list[str],
+) -> dict[str, Any]:
     """
     Generate a concise, grounded explanation for why an issue matches the user.
     Uses LLM when configured, otherwise falls back to a deterministic grounded template.
@@ -102,13 +108,17 @@ async def generate_issue_match_explanation(
             "explanation": fallback_text,
             "is_ai_generated": False,
             "matched_skills": [
-                s for s in user_skills
-                if (issue.get("language") and s.lower() == issue.get("language", "").lower())
+                s
+                for s in user_skills
+                if (
+                    issue.get("language")
+                    and s.lower() == issue.get("language", "").lower()
+                )
                 or s.lower() in issue.get("title", "").lower()
             ],
-            "difficulty_level": "beginner" if any(
-                "good first" in str(lbl).lower() for lbl in issue.get("labels", [])
-            ) else "intermediate",
+            "difficulty_level": "beginner"
+            if any("good first" in str(lbl).lower() for lbl in issue.get("labels", []))
+            else "intermediate",
         }
 
     # Constrained grounded prompt guarding against hallucination
@@ -163,13 +173,17 @@ Return plain text only (no quotes, no markdown headings)."""
             "explanation": cleaned,
             "is_ai_generated": True,
             "matched_skills": [
-                s for s in user_skills
-                if (issue.get("language") and s.lower() == issue.get("language", "").lower())
+                s
+                for s in user_skills
+                if (
+                    issue.get("language")
+                    and s.lower() == issue.get("language", "").lower()
+                )
                 or s.lower() in issue.get("title", "").lower()
             ],
-            "difficulty_level": "beginner" if any(
-                "good first" in str(lbl).lower() for lbl in issue.get("labels", [])
-            ) else "intermediate",
+            "difficulty_level": "beginner"
+            if any("good first" in str(lbl).lower() for lbl in issue.get("labels", []))
+            else "intermediate",
         }
 
     except Exception:
@@ -190,13 +204,19 @@ async def analyze_issue(
     """Analyze full issue suitability with detailed steps and difficulty."""
     if not client or not settings.ai_model:
         return {
-            "difficulty": "beginner" if any(
-                "good first" in str(l).lower() for l in issue.get("labels", [])
-            ) else "intermediate",
+            "difficulty": (
+                "beginner"
+                if any(
+                    "good first" in str(lbl).lower() for lbl in issue.get("labels", [])
+                )
+                else "intermediate"
+            ),
             "required_skills": [issue.get("language")] if issue.get("language") else [],
             "skill_matches": [
-                s for s in user_skills
-                if issue.get("language") and s.lower() == issue.get("language", "").lower()
+                s
+                for s in user_skills
+                if issue.get("language")
+                and s.lower() == issue.get("language", "").lower()
             ],
             "why_it_matches": build_template_explanation(issue, user_skills),
             "recommended_steps": [

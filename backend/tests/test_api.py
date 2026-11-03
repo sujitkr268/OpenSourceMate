@@ -43,7 +43,9 @@ async def test_issue_search_rate_limit_is_429_not_500(api, github_mock):
     assert response.status_code == 429
 
 
-async def test_skills_reuses_repositories_cached_by_repositories_route(api, github_mock):
+async def test_skills_reuses_repositories_cached_by_repositories_route(
+    api, github_mock
+):
     repo = {
         "name": "r",
         "description": None,
@@ -113,7 +115,11 @@ async def test_matching_ranks_issue_that_mentions_a_skill_first(api, github_mock
                     "total_count": 2,
                     "items": [
                         item(1, "Fix typo in docs", ""),
-                        item(2, "Handle empty input", "The Python parser crashes on empty input"),
+                        item(
+                            2,
+                            "Handle empty input",
+                            "The Python parser crashes on empty input",
+                        ),
                     ],
                 },
             )
@@ -186,9 +192,7 @@ async def test_skills_detect_frameworks_and_skip_forks(api, github_mock):
 async def test_skills_include_forks_query_param(api, github_mock):
     github_mock(_skills_handler)
 
-    body = (
-        await api.get("/api/github/users/octocat/skills?include_forks=true")
-    ).json()
+    body = (await api.get("/api/github/users/octocat/skills?include_forks=true")).json()
 
     assert "Go" in {s["name"] for s in body["skills"]}
 

@@ -1,8 +1,8 @@
 # Frontend Testing Guide & Specification
 
-**Issue Reference:** #24  
-**Target:** Frontend Analyze Flow Automated Test Suite  
-**Framework:** Jest + React Testing Library (RTL) + Next.js `next/jest`  
+**Issue Reference:** #24
+**Target:** Frontend Analyze Flow Automated Test Suite
+**Framework:** Jest + React Testing Library (RTL) + Next.js `next/jest`
 
 ---
 
@@ -29,37 +29,40 @@ frontend/
 
 ## 3. Test Suites & Coverage Matrix
 
-| Test Case | Flow / State Covered | Verification Criteria | Status |
-| :--- | :--- | :--- | :---: |
-| `renders landing page` | Initial render | Header, hero titles, input, buttons visible | **PASS** |
-| `empty username` | Client-side validation | Error alert shown; 0 network calls initiated | **PASS** |
-| `invalid username chars` | Regex validation | Clear error shown for invalid symbols / hyphen placement | **PASS** |
-| `username sanitization` | Whitespace & @ strip | Trims spaces and removes `@` before API request | **PASS** |
-| `loading state` | Asynchronous wait | Button disabled, text changes to "Analyzing...", skeletons visible | **PASS** |
-| `successful analysis` | Happy path | Profile data, skills, and recommended issue cards render | **PASS** |
-| `404 user not found` | API error | Informative "User not found" message displayed | **PASS** |
-| `429 rate limit` | API rate limiting | Friendly rate limit notice with reset time displayed | **PASS** |
-| `502/503 service down` | API service failure | "GitHub API is temporarily unavailable" message | **PASS** |
-| `network disconnect` | TypeError / offline | Network error notice + functional "Retry" button | **PASS** |
-| `keyboard submission` | Keyboard accessibility | Pressing `Enter` in input triggers analysis | **PASS** |
-| `theme toggle` | Dark / Light theme | Updates `data-theme` attribute and `localStorage` | **PASS** |
+| Test Case                | Flow / State Covered   | Verification Criteria                                              |  Status  |
+| :----------------------- | :--------------------- | :----------------------------------------------------------------- | :------: |
+| `renders landing page`   | Initial render         | Header, hero titles, input, buttons visible                        | **PASS** |
+| `empty username`         | Client-side validation | Error alert shown; 0 network calls initiated                       | **PASS** |
+| `invalid username chars` | Regex validation       | Clear error shown for invalid symbols / hyphen placement           | **PASS** |
+| `username sanitization`  | Whitespace & @ strip   | Trims spaces and removes `@` before API request                    | **PASS** |
+| `loading state`          | Asynchronous wait      | Button disabled, text changes to "Analyzing...", skeletons visible | **PASS** |
+| `successful analysis`    | Happy path             | Profile data, skills, and recommended issue cards render           | **PASS** |
+| `404 user not found`     | API error              | Informative "User not found" message displayed                     | **PASS** |
+| `429 rate limit`         | API rate limiting      | Friendly rate limit notice with reset time displayed               | **PASS** |
+| `502/503 service down`   | API service failure    | "GitHub API is temporarily unavailable" message                    | **PASS** |
+| `network disconnect`     | TypeError / offline    | Network error notice + functional "Retry" button                   | **PASS** |
+| `keyboard submission`    | Keyboard accessibility | Pressing `Enter` in input triggers analysis                        | **PASS** |
+| `theme toggle`           | Dark / Light theme     | Updates `data-theme` attribute and `localStorage`                  | **PASS** |
 
 ---
 
 ## 4. How to Run Tests Locally
 
 ### Run all tests once:
+
 ```bash
 cd frontend
 npm test
 ```
 
 ### Run tests in watch mode (interactive development):
+
 ```bash
 npm run test:watch
 ```
 
 ### Generate code coverage report:
+
 ```bash
 npm run test:coverage
 ```

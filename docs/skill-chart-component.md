@@ -1,7 +1,7 @@
 # Skill Distribution Chart Component Specification
 
-**Issue Reference:** #12  
-**Component:** `frontend/components/SkillChart.tsx`  
+**Issue Reference:** #12
+**Component:** `frontend/components/SkillChart.tsx`
 **Purpose:** Reusable, zero-dependency, accessible SVG-based skill distribution chart supporting Donut and Horizontal Bar views, legend, interactive tooltips, and screen-reader data table fallbacks.
 
 ---
@@ -11,6 +11,7 @@
 While OpenSourceMate has detected developer technical skills and repository frequencies, displaying skills solely as flat cards does not communicate proportional strength or specialization at a glance.
 
 The `SkillChart` component solves this by:
+
 1. Visualizing top-N skills using proportional SVG geometry without pulling in large external charting libraries (saving bundle size and reducing runtime overhead).
 2. Offering two user-switchable modes:
    - **Donut Chart:** Ideal for understanding overall ecosystem balance and specialization.
@@ -49,7 +50,9 @@ export interface SkillChartProps {
 ## 3. Mathematical Geometry & SVG Implementation
 
 ### 3.1 Donut Arc Calculations
+
 To render crisp circular segments without complex path arc math:
+
 - Radius: $r = \frac{\text{size} - \text{strokeWidth}}{2} = \frac{300 - 38}{2} = 131\text{px}$
 - Total Circumference: $C = 2 \cdot \pi \cdot r \approx 823.097\text{px}$
 - Segment Arc Length: $L_i = \frac{\text{percentage}_i}{100} \cdot C$
@@ -58,18 +61,19 @@ To render crisp circular segments without complex path arc math:
 - Rotation: SVG is rotated $-90^\circ$ so that segments start at 12 o'clock.
 
 ### 3.2 High-Contrast Color Palette
+
 The component uses an 8-color accessible palette with distinct hues across purple, blue, emerald, amber, pink, cyan, indigo, and teal, ensuring WCAG contrast compliance against both `#05070d` and `#ffffff`.
 
 ---
 
 ## 4. Edge Cases Handled
 
-| Scenario | Handled By | Visual Outcome |
-| :--- | :--- | :--- |
-| **Empty Skills (`[]`)** | Empty state container | Friendly icon, explanatory message, no broken SVG |
-| **Single Skill (`[{"Python": 100%}]`)** | Single-skill detection | "Specialized 100%" callout badge with single full-circle track |
-| **Many Skills (> N)** | Automatic aggregation | Top N shown individually; remainder rolled into "Other Technologies" |
-| **Small Viewports (320px)** | Responsive layout | SVG scales automatically using `viewBox="0 0 300 300"`; legend wraps into 1 column |
+| Scenario                                | Handled By             | Visual Outcome                                                                     |
+| :-------------------------------------- | :--------------------- | :--------------------------------------------------------------------------------- |
+| **Empty Skills (`[]`)**                 | Empty state container  | Friendly icon, explanatory message, no broken SVG                                  |
+| **Single Skill (`[{"Python": 100%}]`)** | Single-skill detection | "Specialized 100%" callout badge with single full-circle track                     |
+| **Many Skills (> N)**                   | Automatic aggregation  | Top N shown individually; remainder rolled into "Other Technologies"               |
+| **Small Viewports (320px)**             | Responsive layout      | SVG scales automatically using `viewBox="0 0 300 300"`; legend wraps into 1 column |
 
 ---
 

@@ -64,7 +64,10 @@ class TestSkillDetection(unittest.TestCase):
             {"full_name": "me/api", "language": "Python"},
         ]
         details = {
-            "me/web": {"languages": {"JavaScript": 10}, "dependencies": ["react", "next"]},
+            "me/web": {
+                "languages": {"JavaScript": 10},
+                "dependencies": ["react", "next"],
+            },
             "me/api": {"languages": {"Python": 10}, "dependencies": ["Django"]},
         }
 
@@ -77,7 +80,11 @@ class TestSkillDetection(unittest.TestCase):
 
     def test_topics_map_to_skills_without_double_counting(self):
         repositories = [
-            {"full_name": "me/web", "language": "JavaScript", "topics": ["reactjs", "react", "unknown"]},
+            {
+                "full_name": "me/web",
+                "language": "JavaScript",
+                "topics": ["reactjs", "react", "unknown"],
+            },
         ]
 
         result = analyze_skills(repositories)
@@ -88,7 +95,9 @@ class TestSkillDetection(unittest.TestCase):
 
     def test_languages_endpoint_data_adds_secondary_languages(self):
         repositories = [{"full_name": "me/mixed", "language": "Python"}]
-        details = {"me/mixed": {"languages": {"Python": 90, "Shell": 10}, "dependencies": []}}
+        details = {
+            "me/mixed": {"languages": {"Python": 90, "Shell": 10}, "dependencies": []}
+        }
 
         result = analyze_skills(repositories, repo_details=details)
 

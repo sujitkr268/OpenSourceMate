@@ -44,11 +44,7 @@ function getServerSnapshot(): string {
 }
 
 export function useBookmarkedIssues() {
-  const rawBookmarks = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot
-  );
+  const rawBookmarks = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   let bookmarks: BookmarkedIssue[] = [];
   try {

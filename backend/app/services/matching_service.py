@@ -1,7 +1,7 @@
 import math
 import re
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 SCORE_METHOD = "keyword-tfidf"
 MAX_TEXT_POINTS = 30
@@ -67,10 +67,8 @@ def categorize_issue_freshness(
         }
 
     try:
-        updated = datetime.fromisoformat(
-            updated_at_str.replace("Z", "+00:00")
-        )
-        current_time = now or datetime.now(timezone.utc)
+        updated = datetime.fromisoformat(updated_at_str.replace("Z", "+00:00"))
+        current_time = now or datetime.now(UTC)
         days = max(0, (current_time - updated).days)
 
         if days <= 14:
@@ -142,10 +140,7 @@ def calculate_issue_score(
     reasons = []
     skills = _skill_entries(user_skills)
 
-    labels = {
-        label.lower()
-        for label in issue.get("labels", [])
-    }
+    labels = {label.lower() for label in issue.get("labels", [])}
 
     # -----------------------------------
     # 1. Skill / language match
@@ -157,9 +152,7 @@ def calculate_issue_score(
     # a skill the user relies on more is worth more.
     if issue_language and issue_language.lower() in skills:
         score += round(40 * skills[issue_language.lower()])
-        reasons.append(
-            f"Your profile includes {issue_language}."
-        )
+        reasons.append(f"Your profile includes {issue_language}.")
 
     # -----------------------------------
     # 1b. Skills mentioned in the title, body, labels or repo name
@@ -191,9 +184,7 @@ def calculate_issue_score(
 
     if text_points:
         score += text_points
-        reasons.append(
-            "The issue mentions " + ", ".join(sorted(matched_skills)) + "."
-        )
+        reasons.append("The issue mentions " + ", ".join(sorted(matched_skills)) + ".")
 
     # -----------------------------------
     # 2. Good first issue
@@ -201,9 +192,7 @@ def calculate_issue_score(
 
     if "good first issue" in labels:
         score += 25
-        reasons.append(
-            "This issue is marked as a good first issue."
-        )
+        reasons.append("This issue is marked as a good first issue.")
 
     # -----------------------------------
     # 3. Help wanted
@@ -211,9 +200,7 @@ def calculate_issue_score(
 
     if "help wanted" in labels:
         score += 15
-        reasons.append(
-            "The repository is actively looking for contributors."
-        )
+        reasons.append("The repository is actively looking for contributors.")
 
     # -----------------------------------
     # 4. Issue activity
@@ -223,25 +210,17 @@ def calculate_issue_score(
 
     if updated_at:
         try:
-            updated = datetime.fromisoformat(
-                updated_at.replace("Z", "+00:00")
-            )
+            updated = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
 
-            days_old = (
-                datetime.now(timezone.utc) - updated
-            ).days
+            days_old = (datetime.now(UTC) - updated).days
 
             if days_old <= 30:
                 score += 10
-                reasons.append(
-                    "This issue has been active recently."
-                )
+                reasons.append("This issue has been active recently.")
 
             elif days_old <= 90:
                 score += 5
-                reasons.append(
-                    "This issue has recent activity."
-                )
+                reasons.append("This issue has recent activity.")
 
         except ValueError:
             pass
@@ -254,9 +233,7 @@ def calculate_issue_score(
 
     if comments <= 10:
         score += 10
-        reasons.append(
-            "The issue has a manageable discussion size."
-        )
+        reasons.append("The issue has a manageable discussion size.")
 
     # Keep the uncapped value so results that both reach 100 can still be ordered.
     raw_score = score

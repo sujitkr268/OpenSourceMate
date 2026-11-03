@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 import pytest
@@ -68,7 +68,7 @@ async def test_429_raises_rate_limit_error(github_mock):
     with pytest.raises(GitHubRateLimitError) as exc_info:
         await get_github_user("octocat")
 
-    assert exc_info.value.reset_at == datetime.fromtimestamp(RESET, tz=timezone.utc)
+    assert exc_info.value.reset_at == datetime.fromtimestamp(RESET, tz=UTC)
 
 
 async def test_403_with_no_remaining_requests_is_a_rate_limit(github_mock):
@@ -163,7 +163,9 @@ async def test_get_user_repositories_paginates_beyond_first_page(github_mock):
             return httpx.Response(200, json=[{"name": f"repo-{i}"} for i in range(100)])
         elif page == "2":
             # Return 25 repos for page 2 (terminates pagination)
-            return httpx.Response(200, json=[{"name": f"repo-{100+i}"} for i in range(25)])
+            return httpx.Response(
+                200, json=[{"name": f"repo-{100 + i}"} for i in range(25)]
+            )
         return httpx.Response(200, json=[])
 
     github_mock(handler)

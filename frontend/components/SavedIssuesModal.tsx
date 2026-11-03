@@ -26,9 +26,7 @@ export default function SavedIssuesModal({
         <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
           <div className="flex items-center gap-2.5">
             <span className="text-xl">★</span>
-            <h3 className="text-lg font-semibold tracking-tight text-white">
-              Saved Issues
-            </h3>
+            <h3 className="text-lg font-semibold tracking-tight text-white">Saved Issues</h3>
             <span className="rounded-full bg-purple-500/20 px-2.5 py-0.5 text-xs font-semibold text-purple-300">
               {bookmarks.length}
             </span>
@@ -57,11 +55,10 @@ export default function SavedIssuesModal({
           {bookmarks.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-4xl">🔖</p>
-              <h4 className="mt-4 text-base font-semibold text-gray-200">
-                No saved issues yet
-              </h4>
+              <h4 className="mt-4 text-base font-semibold text-gray-200">No saved issues yet</h4>
               <p className="mx-auto mt-2 max-w-sm text-sm text-gray-500">
-                Bookmark issues you want to contribute to and they will be saved here for easy access across sessions.
+                Bookmark issues you want to contribute to and they will be saved here for easy
+                access across sessions.
               </p>
             </div>
           ) : (
@@ -74,9 +71,7 @@ export default function SavedIssuesModal({
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 text-xs">
-                        <span className="font-mono text-purple-300">
-                          {issue.repository}
-                        </span>
+                        <span className="font-mono text-purple-300">{issue.repository}</span>
                         {issue.language && (
                           <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-gray-300">
                             {issue.language}

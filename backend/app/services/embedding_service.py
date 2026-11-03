@@ -43,12 +43,18 @@ def profile_text(user_skills: list) -> str:
 def issue_text(issue: dict) -> str:
     return " ".join(
         part
-        for part in (issue.get("title"), issue.get("body"), " ".join(issue.get("labels", [])))
+        for part in (
+            issue.get("title"),
+            issue.get("body"),
+            " ".join(issue.get("labels", [])),
+        )
         if part
     )
 
 
-def similarities(user_skills: list, issues: list[dict], model=None) -> list[float] | None:
+def similarities(
+    user_skills: list, issues: list[dict], model=None
+) -> list[float] | None:
     """Cosine similarity (0-1) between the profile and each issue, or None if unavailable.
 
     `model` can be passed in for tests; it only needs an `encode(list[str])` method.
@@ -79,7 +85,7 @@ def similarities(user_skills: list, issues: list[dict], model=None) -> list[floa
             scores.append(0.0)
             continue
 
-        dot = sum(a * b for a, b in zip(profile, values))
+        dot = sum(a * b for a, b in zip(profile, values, strict=False))
         scores.append(max(0.0, dot / (profile_norm * norm)))
 
     return scores

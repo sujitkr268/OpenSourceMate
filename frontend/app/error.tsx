@@ -40,8 +40,8 @@ export default function ErrorBoundary({
         </h1>
 
         <p className="mt-3 text-sm leading-6 text-gray-400 sm:text-base">
-          An unexpected error occurred while processing this page. You can try
-          reloading the component or navigate back to the home page.
+          An unexpected error occurred while processing this page. You can try reloading the
+          component or navigate back to the home page.
         </p>
 
         {/* Primary Actions */}
@@ -101,9 +101,7 @@ export default function ErrorBoundary({
           )}
         </div>
 
-        <p className="mt-10 text-xs text-gray-600">
-          OpenSourceMate • Error Recovery
-        </p>
+        <p className="mt-10 text-xs text-gray-600">OpenSourceMate • Error Recovery</p>
       </div>
     </div>
   );
